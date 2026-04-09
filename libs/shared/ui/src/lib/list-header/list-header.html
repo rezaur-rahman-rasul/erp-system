@@ -1,0 +1,22 @@
+<section class="list-header-card">
+  <div class="list-header-content">
+    <div class="list-header-icon">
+      <app-lucide-icon [name]="icon" [size]="26" />
+    </div>
+
+    <div>
+      @if (badge) {
+      <div class="list-header-badge">{{ badge }}</div>
+      }
+      <h1 class="list-header-title">{{ title }}</h1>
+      <p class="list-header-subtitle">{{ subtitle }}</p>
+    </div>
+  </div>
+
+  @if (actionText && actionRoute) {
+  <a [routerLink]="actionRoute" class="primary-action-btn">
+    <app-lucide-icon name="plus" [size]="16" />
+    <span>{{ actionText }}</span>
+  </a>
+  }
+</section>

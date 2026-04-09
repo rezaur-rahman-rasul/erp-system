@@ -1,0 +1,73 @@
+/* list Header styles */
+
+:host {
+  @apply block;
+}
+
+/* Card */
+.list-header-card {
+  @apply relative flex flex-col gap-5 overflow-hidden rounded-[28px]
+         border border-slate-200 bg-white p-6 shadow-sm;
+
+  @apply lg:flex-row lg:items-center lg:justify-between lg:p-8;
+
+  &::before {
+    content: '';
+    @apply pointer-events-none absolute inset-0 opacity-90;
+    background: linear-gradient(to right, #eff6ff, #ffffff, #eef2ff);
+  }
+}
+
+/* Ensure content stays above gradient */
+.list-header-content,
+.list-header-card > a {
+  @apply relative z-10;
+}
+
+/* Content layout */
+.list-header-content {
+  @apply flex items-start gap-4;
+}
+
+/* Icon */
+.list-header-icon {
+  @apply flex h-14 w-14 items-center justify-center rounded-xl
+         bg-blue-700 text-white;
+
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.167);
+}
+
+/* Badge */
+.list-header-badge {
+  @apply inline-flex items-center rounded-full bg-blue-50
+         px-3 py-1 text-xs font-semibold text-blue-700;
+
+  border: 1px inset rgba(30, 64, 175, 0.12);
+}
+
+/* Title */
+.list-header-title {
+  @apply mt-3 text-2xl font-bold tracking-[-0.025em] text-slate-900;
+
+  @apply md:text-3xl;
+}
+
+/* Subtitle */
+.list-header-subtitle {
+  @apply mt-2 max-w-[42rem] text-sm text-slate-500;
+
+  @apply md:text-base;
+}
+
+/* Button */
+.primary-action-btn {
+  @apply inline-flex items-center gap-2 rounded-2xl
+         bg-blue-700 px-5 py-3 text-sm font-semibold text-white
+         transition duration-200;
+
+  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.167);
+
+  &:hover {
+    @apply -translate-y-px bg-blue-800;
+  }
+}

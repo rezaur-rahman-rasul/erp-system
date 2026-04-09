@@ -1,0 +1,155 @@
+@reference "../../../styles.scss";
+
+:host {
+  display: block;
+}
+
+.login-container {
+  @apply relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-950 px-4 py-12;
+}
+
+/* Background Decoration */
+.bg-decoration {
+  @apply absolute inset-0 z-0 overflow-hidden;
+}
+
+.blob {
+  @apply absolute rounded-full opacity-30 blur-[100px] transition-all duration-1000;
+}
+
+.blob-1 {
+  @apply -top-20 -left-20 h-[500px] w-[500px] bg-blue-600/40;
+}
+
+.blob-2 {
+  @apply -bottom-20 -right-20 h-[600px] w-[600px] bg-indigo-600/40;
+}
+
+/* Login Card */
+.login-card-wrapper {
+  @apply relative z-10 w-full max-w-md;
+}
+
+.login-card {
+  @apply overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.03] shadow-2xl backdrop-blur-3xl;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.card-header {
+  @apply flex flex-col items-center border-b border-white/5 bg-white/[0.02] px-8 py-10 text-center;
+}
+
+.logo-wrapper {
+  @apply mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-900/40;
+}
+
+.brand-title {
+  @apply text-2xl font-bold tracking-tight text-white;
+}
+
+.brand-subtitle {
+  @apply mt-1 text-sm font-medium text-slate-400;
+}
+
+.form-wrapper {
+  @apply px-8 py-10;
+}
+
+.welcome-text {
+  @apply mb-8;
+  
+  h2 {
+    @apply text-xl font-semibold text-white;
+  }
+  
+  p {
+    @apply mt-1 text-sm text-slate-400;
+  }
+}
+
+/* Form Styles */
+.login-form {
+  @apply space-y-6;
+}
+
+.form-group {
+  @apply space-y-2;
+  
+  label {
+    @apply block text-xs font-semibold uppercase tracking-wider text-slate-400;
+  }
+}
+
+.label-row {
+  @apply flex items-center justify-between;
+}
+
+.input-wrapper {
+  @apply relative flex items-center rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 transition-all duration-200;
+  
+  &:focus-within {
+    @apply border-blue-500/50 bg-white/[0.08] ring-4 ring-blue-500/10;
+  }
+}
+
+.input-error {
+  @apply border-rose-500/50 bg-rose-500/5;
+}
+
+.input-icon {
+  @apply mr-3 text-slate-500;
+}
+
+.input-wrapper input {
+  @apply w-full bg-transparent text-sm text-white placeholder-slate-500 outline-none;
+}
+
+.password-toggle {
+  @apply ml-2 text-slate-500 hover:text-white transition-colors;
+}
+
+.error-text {
+  @apply mt-1 text-xs font-medium text-rose-500;
+}
+
+.error-alert {
+  @apply mb-6 flex items-center gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200;
+}
+
+.forgot-link {
+  @apply text-xs font-medium text-blue-400 hover:text-blue-300 transition-colors;
+}
+
+/* Options */
+.options-row {
+  @apply flex items-center justify-between;
+}
+
+.checkbox-wrapper {
+  @apply flex cursor-pointer items-center gap-2;
+  
+  input {
+    @apply h-4 w-4 rounded border-white/10 bg-white/5 text-blue-600 focus:ring-blue-500/50;
+  }
+}
+
+.checkbox-label {
+  @apply text-sm text-slate-400;
+}
+
+/* Submit Button */
+.submit-btn {
+  @apply flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-blue-900/40 transition-all duration-200 hover:bg-blue-500 hover:shadow-blue-900/60 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.card-footer {
+  @apply border-t border-white/5 bg-white/[0.01] px-8 py-6 text-center;
+  
+  p {
+    @apply text-sm text-slate-500;
+  }
+  
+  a {
+    @apply font-semibold text-blue-400 hover:text-blue-300 transition-colors;
+  }
+}

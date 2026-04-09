@@ -1,0 +1,234 @@
+<div class="orders-page">
+  <app-list-header
+    icon="users"
+    badge="Identity Management"
+    title="Users List"
+    subtitle="Manage identity access, roles, and tenant associations efficiently."
+    actionText="Create User"
+    actionRoute="/iam/users/create"
+  ></app-list-header>
+
+  <app-list-overview
+    icon="layoutDashboard"
+    title="Users Overview"
+    subtitle="Track all application users, their roles, and status."
+    metricLabel="Total Users"
+    [metricValue]="totalUsers()"
+  ></app-list-overview>
+
+  <section class="table-shell">
+    <div class="table-shell-header">
+      <div>
+        <h2 class="table-shell-title">All Users</h2>
+        <p class="table-shell-subtitle">User records and actions</p>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th>
+              <button
+                type="button"
+                class="th-btn"
+                (click)="toggleSort('id')"
+              >
+                <span>ID</span>
+                <span class="sort-icon">{{ sortIcon('id') }}</span>
+              </button>
+            </th>
+            <th>
+              <button
+                type="button"
+                class="th-btn"
+                (click)="toggleSort('displayName')"
+              >
+                <span>Display Name</span>
+                <span class="sort-icon">{{ sortIcon('displayName') }}</span>
+              </button>
+            </th>
+            <th>
+              <button
+                type="button"
+                class="th-btn"
+                (click)="toggleSort('email')"
+              >
+                <span>Email</span>
+                <span class="sort-icon">{{ sortIcon('email') }}</span>
+              </button>
+            </th>
+             <th>
+               <div class="th-btn-no-sort">
+                 <span>Role</span>
+               </div>
+             </th>
+            <th>
+              <button
+                type="button"
+                class="th-btn"
+                (click)="toggleSort('tenantId')"
+              >
+                <span>Tenant</span>
+                <span class="sort-icon">{{ sortIcon('tenantId') }}</span>
+              </button>
+            </th>
+            <th class="text-center">
+              <button
+                type="button"
+                class="th-btn th-btn-center"
+                (click)="toggleSort('status')"
+              >
+                <span>Status</span>
+                <span class="sort-icon">{{ sortIcon('status') }}</span>
+              </button>
+            </th>
+            <th class="text-center">Actions</th>
+          </tr>
+
+          <tr class="filter-row">
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter ID"
+                [value]="filters().id"
+                (input)="setFilter('id', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Name"
+                [value]="filters().displayName"
+                (input)="setFilter('displayName', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Email"
+                [value]="filters().email"
+                (input)="setFilter('email', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Role"
+                [value]="filters().role"
+                (input)="setFilter('role', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Tenant"
+                [value]="filters().tenantId"
+                (input)="setFilter('tenantId', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Status"
+                [value]="filters().status"
+                (input)="setFilter('status', $any($event.target).value)"
+              />
+            </th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @if (users().length === 0) {
+          <tr>
+            <td colspan="7" class="empty-row-cell">
+              <div class="empty-state-inline">
+                <div class="empty-icon">
+                  <app-lucide-icon name="users" [size]="28" />
+                </div>
+                <h3 class="empty-title">No users found</h3>
+                <p class="empty-subtitle">
+                  Try changing your filters or create a new user.
+                </p>
+              </div>
+            </td>
+          </tr>
+          } @else { @for (user of users(); track trackUser($index, user)) {
+          <tr class="data-row">
+            <td>
+              <a
+                class="order-link font-mono text-xs"
+                [routerLink]="['/iam/users', user.id]"
+              >
+                <span>{{ user.id }}</span>
+                <app-lucide-icon name="sparkles" [size]="14" />
+              </a>
+            </td>
+
+            <td class="font-medium text-slate-900">{{ user.displayName }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <div class="flex flex-wrap gap-1">
+                @for (role of user.roles; track role.id) {
+                  <span class="status-badge" [class]="role.code === 'PLATFORM_ADMIN' ? 'status-completed' : 'status-new'">
+                    {{ role.name }}
+                  </span>
+                }
+              </div>
+            </td>
+            <td class="font-mono text-xs">{{ user.tenantId }}</td>
+
+            <td class="text-center">
+              <span class="status-badge font-bold" [class]="statusClass(user.status)">
+                {{ user.status }}
+              </span>
+            </td>
+
+            <td>
+              <div class="action-group">
+                <button
+                  type="button"
+                  class="action-btn action-amber"
+                >
+                  Assign
+                </button>
+                <button
+                  type="button"
+                  class="action-btn action-emerald"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="action-btn action-rose"
+                  (click)="onDelete(user)"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+          } }
+        </tbody>
+      </table>
+    </div>
+
+    <app-list-pagination
+      [currentPage]="currentPage()"
+      [totalPages]="totalPages()"
+      [rowsPerPage]="rowsPerPage()"
+      [pageInfo]="pageInfo()"
+      (rowsPerPageChange)="setRowsPerPage($event)"
+      (prevPage)="prevPage()"
+      (nextPage)="nextPage()"
+      (goToPage)="goToPage($event)"
+    ></app-list-pagination>
+  </section>
+</div>

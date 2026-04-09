@@ -1,0 +1,31 @@
+<div class="orders-page">
+  <app-list-header
+    icon="shieldCheck"
+    badge="Access Control"
+    title="Roles & Permissions"
+    subtitle="Manage user roles, access levels, and security permissions."
+    actionText="Create Role"
+    actionRoute="/iam/roles/create"
+  ></app-list-header>
+
+  <section class="table-shell">
+    <div class="table-shell-header">
+      <div>
+        <h2 class="table-shell-title">All Roles</h2>
+        <p class="table-shell-subtitle">Role definitions and permission sets</p>
+      </div>
+    </div>
+    
+    <div class="p-10 text-center bg-white rounded-b-3xl">
+      <div class="flex flex-col items-center">
+        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-400">
+          <app-lucide-icon name="shieldAlert" [size]="28" />
+        </div>
+        <h3 class="text-base font-semibold text-slate-700">Roles Module in Development</h3>
+        <p class="mt-2 text-sm text-slate-500 max-w-sm mx-auto">
+          We are currently building the roles and permissions engine. This feature will be available shortly.
+        </p>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,31 @@
+<section class="overview-grid">
+  <article class="overview-card">
+    <div class="overview-icon">
+      <app-lucide-icon [name]="icon" [size]="22" />
+    </div>
+
+    <div>
+      <h2 class="overview-title">{{ title }}</h2>
+      <p class="overview-subtitle">{{ subtitle }}</p>
+    </div>
+  </article>
+
+  @if (metricLabel && metricValue !== '') {
+    <article class="count-card">
+      <div class="count-card-row">
+        <div>
+          <p class="count-card-label">{{ metricLabel }}</p>
+          <p class="count-card-value">{{ metricValue }}</p>
+        </div>
+
+        <div class="count-card-icon">
+          <app-lucide-icon name="chartNoAxesCombined" [size]="22" />
+        </div>
+      </div>
+
+      <div class="count-progress">
+        <div class="count-progress-fill"></div>
+      </div>
+    </article>
+  }
+</section>

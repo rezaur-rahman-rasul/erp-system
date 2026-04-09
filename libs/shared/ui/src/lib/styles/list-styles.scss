@@ -1,0 +1,191 @@
+/* Shared List and Table Styles */
+
+.orders-page {
+  @apply space-y-6;
+}
+
+/* Table shell */
+.table-shell {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid rgb(226 232 240);
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.table-shell-header {
+  @apply flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-4;
+}
+
+.table-shell-title {
+  @apply text-lg font-semibold text-slate-800;
+}
+
+.table-shell-subtitle {
+  @apply text-sm text-slate-500;
+}
+
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Table */
+.orders-table {
+  width: 100%;
+  min-width: 1200px; /* Adjusted from 1400px to be a bit more flexible */
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+  color: rgb(51 65 85);
+}
+
+.orders-table thead tr:first-child th {
+  @apply border-b border-slate-200 bg-slate-100 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-700;
+  border-right: 1px solid rgb(226 232 240);
+}
+
+.orders-table thead tr:first-child th:last-child {
+  border-right: none;
+}
+
+.filter-row th {
+  @apply border-b border-slate-200 bg-white px-3 py-2;
+  border-right: 1px solid rgb(226 232 240);
+}
+
+.filter-row th:last-child {
+  border-right: none;
+}
+
+.th-btn {
+  @apply inline-flex w-full items-center gap-1 text-left;
+}
+
+.th-btn-right {
+  @apply justify-end;
+}
+
+.th-btn-center {
+  @apply justify-center;
+}
+
+.sort-icon {
+  @apply text-[10px] text-blue-400;
+}
+
+.filter-input {
+  @apply w-full rounded-[10px] border border-slate-300 bg-white px-3 py-1.5 text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100;
+}
+
+.data-row td {
+  @apply border-b border-slate-200 px-3 py-2.5 align-middle;
+  border-right: 1px solid rgb(226 232 240);
+  line-height: 1.2;
+}
+
+.data-row td:last-child {
+  border-right: none;
+}
+
+.data-row:nth-child(odd) {
+  @apply bg-white;
+}
+
+.data-row:nth-child(even) {
+  background: rgb(248 250 252);
+}
+
+.data-row:hover {
+  background: rgba(239, 246, 255, 0.9);
+}
+
+.order-link {
+  @apply inline-flex items-center gap-1.5 font-medium text-slate-800 transition hover:text-blue-600;
+}
+
+.amount {
+  @apply text-right whitespace-nowrap;
+}
+
+.total-amount {
+  @apply font-semibold text-blue-600;
+}
+
+.paid-amount {
+  @apply text-emerald-600;
+}
+
+.due-amount {
+  @apply font-semibold text-rose-600;
+}
+
+.status-badge {
+  @apply inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[10px] font-semibold leading-none;
+}
+
+.status-new {
+  @apply bg-slate-100 text-slate-700;
+}
+
+.status-progress {
+  @apply bg-amber-100 text-amber-700;
+}
+
+.status-completed {
+  @apply bg-emerald-100 text-emerald-700;
+}
+
+.status-delivered {
+  @apply bg-cyan-100 text-cyan-700;
+}
+
+.status-default {
+  @apply bg-slate-100 text-slate-700;
+}
+
+.action-group {
+  @apply flex min-w-max items-center justify-center gap-1.5;
+}
+
+.action-btn {
+  @apply rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-white transition;
+}
+
+.action-amber {
+  @apply bg-amber-500 hover:bg-amber-600;
+}
+
+.action-emerald {
+  @apply bg-emerald-500 hover:bg-emerald-600;
+}
+
+.action-rose {
+  @apply bg-rose-500 hover:bg-rose-600;
+}
+
+/* Empty states */
+.empty-state {
+  @apply flex flex-col items-center px-6 py-14 text-center;
+}
+
+.empty-icon {
+  @apply mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-500;
+}
+
+.empty-title {
+  @apply text-base font-semibold text-slate-700;
+}
+
+.empty-subtitle {
+  @apply mt-1 mb-4 text-sm text-slate-500;
+}
+
+.empty-row-cell {
+  @apply px-6 py-14 text-center;
+}
+
+.empty-state-inline {
+  @apply flex flex-col items-center;
+}

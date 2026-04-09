@@ -1,0 +1,82 @@
+<div class="pagination-bar">
+  <div class="pagination-left">
+    <span class="pagination-label">Rows per page</span>
+    <select
+      class="rows-select"
+      [value]="rowsPerPage"
+      (change)="rowsPerPageChange.emit($any($event.target).value)"
+    >
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+    </select>
+  </div>
+
+  <div class="pagination-center">
+    Showing
+    <span class="font-semibold text-slate-800">{{ pageInfo.start }}</span>
+    to
+    <span class="font-semibold text-slate-800">{{ pageInfo.end }}</span>
+    of
+    <span class="font-semibold text-slate-800">{{ pageInfo.total }}</span>
+    results
+  </div>
+
+  <div class="pagination-right">
+    <button
+      type="button"
+      class="pager-btn"
+      [disabled]="currentPage === 1"
+      (click)="prevPage.emit()"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="m15 19-7-7 7-7"
+        />
+      </svg>
+      Previous
+    </button>
+
+    <div class="page-numbers">
+      @for (p of pageNumbers; track p) {
+      <button
+        type="button"
+        class="page-number"
+        [class.page-number-active]="p === currentPage"
+        (click)="goToPage.emit(p)"
+      >
+        {{ p }}
+      </button>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="pager-btn"
+      [disabled]="currentPage === totalPages"
+      (click)="nextPage.emit()"
+    >
+      Next
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,157 @@
+<div
+  class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.10),_transparent_28%),linear-gradient(180deg,#eef2f7,#f8fafc_30%,#f8fafc)] text-slate-900"
+>
+  <!-- Backdrop -->
+  <div
+    id="sidebarBackdrop"
+    class="fixed inset-0 bg-slate-950/50 backdrop-blur-[2px] z-30 lg:hidden"
+    [class.hidden]="!isMobileOpen()"
+    (click)="closeMobileSidebar()"
+  ></div>
+
+  <div
+    class="grid min-h-screen app-content"
+  >
+    <!-- Sidebar -->
+    <aside
+      id="sidebar"
+      class="fixed top-0 left-0 z-40 h-screen bg-slate-950 text-slate-100 shadow-2xl border-r border-white/10 transition-all duration-300 ease-in-out flex flex-col"
+      [class.-translate-x-full]="!isDesktop() && !isMobileOpen()"
+      [class.translate-x-0]="isDesktop() || isMobileOpen()"
+      [class.w-72]="!isCollapsed()"
+      [class.w-24]="isCollapsed()"
+      [class.sidebar-collapsed]="isDesktop() && isCollapsed()"
+    >
+      <!-- Brand -->
+      <div
+        class="h-20 px-5 flex items-center border-b border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950"
+      >
+        <div
+          class="brand-wrapper flex items-center gap-4 w-full"
+          [class.justify-center]="isDesktop() && isCollapsed()"
+        >
+          <button
+            id="sidebarToggle"
+            type="button"
+            class="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-700 bg-slate-900 text-white hover:bg-slate-800 transition-all duration-300"
+            (click)="toggleSidebar()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5 transition-transform duration-300"
+              [class.rotate-180]="isCollapsed()"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+
+          <div
+            id="brandText"
+            class="min-w-0"
+            [class.hidden]="isDesktop() && isCollapsed()"
+          >
+            <h2
+              class="text-base font-bold tracking-wide text-white leading-tight"
+            >
+              Hishab Nikash
+            </h2>
+            <p class="brand-subtitle text-xs text-slate-400 mt-0.5">
+              ERP System
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search / quick area -->
+      <div
+        class="px-4 pt-4 pb-2 search-box"
+        [class.hidden]="isDesktop() && isCollapsed()"
+      >
+        <div
+          class="relative rounded-2xl border border-white/10 bg-white/5 px-3 py-2 flex items-center gap-2 focus-within:bg-white/10 focus-within:border-blue-500/50 transition-all duration-200"
+        >
+          <app-lucide-icon name="search" [size]="16" class="text-slate-500" />
+          <input
+            type="text"
+            placeholder="Search Navigation..."
+            class="w-full bg-transparent border-none p-0 text-sm text-slate-200 placeholder:text-slate-500 focus:ring-0 outline-none"
+          />
+        </div>
+      </div>
+
+      <!-- Nav -->
+      <nav class="flex-1 overflow-y-auto sidebar-scroll px-4 py-3 space-y-4">
+        @for (item of navItems; track item.path) {
+          <a
+            [routerLink]="[item.path]"
+            routerLinkActive="bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_18px_40px_-25px_rgba(15,23,42,0.95)]"
+            [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+            class="nav-item group relative flex items-center gap-3 rounded-2xl px-3 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all duration-200"
+            [class.justify-center]="isDesktop() && isCollapsed()"
+          >
+            <span
+              class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"
+              routerLinkActive="opacity-100"
+            ></span>
+            <span
+              class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/80 border border-white/5 text-slate-200 group-hover:bg-blue-600/15 group-hover:text-blue-400 transition"
+              routerLinkActive="bg-blue-600/20 text-blue-400 border-blue-500/30"
+            >
+              <app-lucide-icon [name]="item.icon" [size]="18" />
+            </span>
+            <span
+              class="sidebar-label flex-1 font-medium"
+              [class.hidden]="isDesktop() && isCollapsed()"
+            >
+              {{ item.label }}
+            </span>
+          </a>
+        }
+      </nav>
+
+      <!-- Sidebar Footer -->
+      <div class="mt-auto border-t border-white/10 p-4">
+        <div 
+          class="group flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-white/5"
+          [class.justify-center]="isCollapsed()"
+        >
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-500/20">
+            {{ currentUser()?.displayName?.charAt(0) || 'U' }}
+          </div>
+          
+          <div class="footer-content flex flex-1 flex-col overflow-hidden" [class.hidden]="isCollapsed()">
+            <span class="truncate text-sm font-semibold text-slate-200">{{ currentUser()?.displayName || 'Guest User' }}</span>
+            <span class="truncate text-xs text-slate-500">{{ currentUser()?.email || 'Not logged in' }}</span>
+          </div>
+
+          <button 
+            (click)="logout()"
+            class="footer-content group/logout rounded-lg p-2 text-slate-500 transition-colors hover:bg-rose-500/10 hover:text-rose-500"
+            [class.hidden]="isCollapsed()"
+            title="Sign Out"
+          >
+            <app-lucide-icon name="logOut" [size]="18" />
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div 
+      class="min-w-0 flex flex-col transition-all duration-300 ease-in-out"
+      [class.lg:ml-72]="isDesktop() && !isCollapsed()"
+      [class.lg:ml-24]="isDesktop() && isCollapsed()"
+    >
+      <main class="w-full h-full px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+        <router-outlet />
+      </main>
+    </div>
+  </div>
+</div>

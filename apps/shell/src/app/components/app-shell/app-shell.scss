@@ -1,0 +1,66 @@
+@reference "../../../styles.scss";
+
+:host {
+  @apply block;
+}
+
+/* App layout containers */
+.app-content {
+  /* Parent grid remains full width */
+  width: 100%;
+}
+
+/* Sidebar scrollbar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 9999px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Sidebar base */
+#sidebar {
+  transition:
+    width 300ms ease,
+    transform 300ms ease;
+  overflow: hidden;
+}
+
+/* Smooth hide for collapsible elements */
+.sidebar-label,
+.sidebar-section-title,
+.brand-subtitle,
+.footer-content,
+#brandText,
+.search-box {
+  transition: opacity 200ms ease;
+  white-space: nowrap;
+}
+
+.sidebar-collapsed {
+  .sidebar-label,
+  .sidebar-section-title,
+  .brand-subtitle,
+  .footer-content,
+  #brandText,
+  .search-box {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* Nav item animation */
+.nav-item {
+  transition: all 200ms ease;
+}
+
+/* Ensure the main container grows to fill available space */
+main {
+  min-height: calc(100vh - 4rem);
+}
