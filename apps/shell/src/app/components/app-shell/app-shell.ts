@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostListener,
-  OnInit,
   inject,
   signal,
 } from "@angular/core";
@@ -25,7 +24,7 @@ import { AuthService } from "@hishab-nikash/shared-auth";
   styleUrl: "./app-shell.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppShellComponent implements OnInit {
+export class AppShellComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
@@ -36,12 +35,6 @@ export class AppShellComponent implements OnInit {
 
   get isSidebarOpen(): boolean {
     return this.isDesktop() || this.isMobileOpen();
-  }
-
-  ngOnInit(): void {
-    if (localStorage.getItem('access_token')) {
-      this.authService.me().subscribe();
-    }
   }
 
   @HostListener("window:resize", ["$event"])
@@ -78,11 +71,11 @@ export class AppShellComponent implements OnInit {
     if (path.includes("iam/users")) return "User Management";
     if (path.includes("iam/roles")) return "Roles & Permissions";
     if (path.includes("iam/organizations")) return "Organization Access";
-    if (path.includes("customers")) return "Customers";
-    if (path.includes("employees")) return "Employees";
-    if (path.includes("measurements")) return "Measurements";
-    if (path.includes("orders")) return "Orders";
-    if (path.includes("payments")) return "Payments";
+    // if (path.includes("customers")) return "Customers";
+    // if (path.includes("employees")) return "Employees";
+    // if (path.includes("measurements")) return "Measurements";
+    // if (path.includes("orders")) return "Orders";
+    // if (path.includes("payments")) return "Payments";
     return "Dashboard Overview";
   }
 
@@ -90,11 +83,11 @@ export class AppShellComponent implements OnInit {
     { path: "/dashboard", label: "Dashboard", icon: "layoutDashboard" },
     { path: "/iam/users", label: "Users", icon: "users" },
     { path: "/iam/roles", label: "Roles", icon: "shieldCheck" },
-    { path: "/customers", label: "Customers", icon: "userCircle" },
-    { path: "/employees", label: "Employees", icon: "briefcaseBusiness" },
-    { path: "/measurements", label: "Measurements", icon: "ruler" },
-    { path: "/orders", label: "Orders", icon: "package2" },
-    { path: "/payments", label: "Payments", icon: "walletCards" },
+    // { path: "/customers", label: "Customers", icon: "userCircle" },
+    // { path: "/employees", label: "Employees", icon: "briefcaseBusiness" },
+    // { path: "/measurements", label: "Measurements", icon: "ruler" },
+    // { path: "/orders", label: "Orders", icon: "package2" },
+    // { path: "/payments", label: "Payments", icon: "walletCards" },
   ];
 
   logout(): void {

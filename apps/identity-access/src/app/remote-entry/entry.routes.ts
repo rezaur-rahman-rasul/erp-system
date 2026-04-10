@@ -10,6 +10,10 @@ export const remoteRoutes: Route[] = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: 'dashboard', loadComponent: () => import('../pages/dashboard/dashboard').then(m => m.DashboardComponent) },
   { path: 'users', loadComponent: () => import('../pages/users/users').then(m => m.UsersComponent) },
+  { path: 'users/create', loadComponent: () => import('../pages/users/user-form/user-form').then(m => m.UserFormComponent) },
+  { path: 'users/:id/edit', loadComponent: () => import('../pages/users/user-form/user-form').then(m => m.UserFormComponent) },
+  { path: 'roles/create', loadComponent: () => import('../pages/roles/role-form/role-form').then(m => m.RoleFormComponent) },
+  { path: 'roles/:id/edit', loadComponent: () => import('../pages/roles/role-form/role-form').then(m => m.RoleFormComponent) },
   { path: 'roles', loadComponent: () => import('../pages/roles/roles').then(m => m.RolesComponent) },
   { path: 'login', loadComponent: () => import('../pages/login/login').then(m => m.LoginComponent) }
 ];

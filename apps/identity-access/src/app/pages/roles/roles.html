@@ -2,30 +2,318 @@
   <app-list-header
     icon="shieldCheck"
     badge="Access Control"
-    title="Roles & Permissions"
-    subtitle="Manage user roles, access levels, and security permissions."
-    actionText="Create Role"
+    title="Roles List"
+    subtitle="Manage role definitions, permission bundles, and access coverage efficiently."
+    actionText="Add Role"
     actionRoute="/iam/roles/create"
   ></app-list-header>
+
+  <app-list-overview
+    icon="layoutDashboard"
+    title="Roles Overview"
+    subtitle="Track all application roles, their descriptions, and permission bundles."
+    metricLabel="Total Roles"
+    [metricValue]="totalRolesCount()"
+  ></app-list-overview>
 
   <section class="table-shell">
     <div class="table-shell-header">
       <div>
-        <h2 class="table-shell-title">All Roles</h2>
-        <p class="table-shell-subtitle">Role definitions and permission sets</p>
+        <h2 class="table-shell-title">Roles List</h2>
+        <p class="table-shell-subtitle">Role records and permission coverage</p>
       </div>
-    </div>
-    
-    <div class="p-10 text-center bg-white rounded-b-3xl">
-      <div class="flex flex-col items-center">
-        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-400">
-          <app-lucide-icon name="shieldAlert" [size]="28" />
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        @if (actionMessage()) {
+          <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+            {{ actionMessage() }}
+          </div>
+        }
+        <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
+          {{ configuredRolesCount() }} configured roles
         </div>
-        <h3 class="text-base font-semibold text-slate-700">Roles Module in Development</h3>
-        <p class="mt-2 text-sm text-slate-500 max-w-sm mx-auto">
-          We are currently building the roles and permissions engine. This feature will be available shortly.
-        </p>
+        <div class="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">
+          {{ totalPermissionsCount() }} unique permissions
+        </div>
+        @if (actionError()) {
+          <div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
+            {{ actionError() }}
+          </div>
+        }
       </div>
     </div>
+
+    <div class="table-scroll">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th style="width: 50px" class="text-center">Sl.</th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('code')">
+                <span>Code</span>
+                <span class="sort-icon">{{ sortIcon('code') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('name')">
+                <span>Role</span>
+                <span class="sort-icon">{{ singleArrowSortIcon('name') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('description')">
+                <span>Description</span>
+                <span class="sort-icon">{{ sortIcon('description') }}</span>
+              </button>
+            </th>
+            <th>
+              <span class="th-btn cursor-default hover:bg-transparent">
+                <span>Permissions</span>
+              </span>
+            </th>
+            <th class="text-center">
+              <button type="button" class="th-btn th-btn-center" (click)="toggleSort('permissionCount')">
+                <span>Coverage</span>
+                <span class="sort-icon">{{ sortIcon('permissionCount') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('createdBy')">
+                <span>Created By</span>
+                <span class="sort-icon">{{ sortIcon('createdBy') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('createdAt')">
+                <span>Created At</span>
+                <span class="sort-icon">{{ sortIcon('createdAt') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('lastUpdatedBy')">
+                <span>Updated By</span>
+                <span class="sort-icon">{{ sortIcon('lastUpdatedBy') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('lastUpdatedAt')">
+                <span>Last Updated</span>
+                <span class="sort-icon">{{ sortIcon('lastUpdatedAt') }}</span>
+              </button>
+            </th>
+            <th class="text-center">Actions</th>
+          </tr>
+
+          <tr class="filter-row">
+            <th></th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Code"
+                [value]="filters().code"
+                (input)="setFilter('code', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Role Name"
+                [value]="filters().name"
+                (input)="setFilter('name', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Description"
+                [value]="filters().description"
+                (input)="setFilter('description', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Permission"
+                [value]="filters().permission"
+                (input)="setFilter('permission', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Creator"
+                [value]="filters().createdBy"
+                (input)="setFilter('createdBy', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="date"
+                [value]="filters().createdAt"
+                (input)="setFilter('createdAt', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter Updater"
+                [value]="filters().lastUpdatedBy"
+                (input)="setFilter('lastUpdatedBy', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="date"
+                [value]="filters().lastUpdatedAt"
+                (input)="setFilter('lastUpdatedAt', $any($event.target).value)"
+              />
+            </th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody [class.data-rows-container]="!isLoading()">
+          @if (isLoading()) {
+            @for (row of skeletonRows; track $index) {
+              <tr class="skeleton-row">
+                <td><div class="skeleton-cell w-8 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 58%"></div></td>
+                <td><div class="skeleton-cell" style="width: 68%"></div></td>
+                <td><div class="skeleton-cell" style="width: 84%"></div></td>
+                <td><div class="skeleton-cell" style="width: 92%"></div></td>
+                <td><div class="skeleton-cell w-20 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 62%"></div></td>
+                <td><div class="skeleton-cell" style="width: 72%"></div></td>
+                <td><div class="skeleton-cell" style="width: 62%"></div></td>
+                <td><div class="skeleton-cell" style="width: 72%"></div></td>
+                <td><div class="skeleton-cell w-16 mx-auto"></div></td>
+              </tr>
+            }
+          }
+
+          @if (!isLoading() && pagedRoles().length === 0) {
+            <tr>
+              <td colspan="11" class="empty-row-cell">
+                <div class="empty-state-inline">
+                  <div class="empty-icon">
+                    <app-lucide-icon name="shieldAlert" [size]="28" />
+                  </div>
+                  <h3 class="empty-title">No roles found</h3>
+                  <p class="empty-subtitle">
+                    Try changing your filters or add roles in the backend first.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (!isLoading()) {
+            @for (role of pagedRoles(); track trackRole($index, role); let i = $index) {
+              <tr class="data-row">
+                <td class="text-center text-slate-500 text-xs font-semibold tabular-nums">
+                  {{ serialOf(i) }}
+                </td>
+                <td>
+                  <a
+                    class="order-link"
+                    [routerLink]="['/iam/roles', role.id, 'edit']"
+                    title="Click to edit"
+                  >
+                    <span>{{ role.code }}</span>
+                    <app-lucide-icon name="sparkles" [size]="14" />
+                  </a>
+                </td>
+                <td>
+                  <div class="flex flex-col gap-1">
+                    <span class="font-bold text-slate-800">{{ role.name }}</span>
+                    <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                      Permission Bundle
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <span class="cell-ellipsis" [title]="role.description || 'No description provided'">
+                    {{ role.description || 'No description provided' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="flex flex-wrap gap-1">
+                    @if (role.permissions.length === 0) {
+                      <span class="status-badge status-new">No permissions</span>
+                    } @else {
+                      @for (permission of visiblePermissions(role); track permission) {
+                        <span class="status-badge status-completed">{{ permission }}</span>
+                      }
+                      @if (hiddenPermissionCount(role) > 0) {
+                        <span class="status-badge status-default">
+                          +{{ hiddenPermissionCount(role) }} more
+                        </span>
+                      }
+                    }
+                  </div>
+                </td>
+                <td class="text-center">
+                  <div class="flex flex-col items-center gap-1">
+                    <span class="status-badge" [class]="permissionCountClass(role)">
+                      {{ permissionCountLabel(role) }}
+                    </span>
+                    <span class="text-[11px] text-slate-400">
+                      Total mapped access
+                    </span>
+                  </div>
+                </td>
+                <td class="text-xs text-slate-500">{{ role.createdBy || '--' }}</td>
+                <td class="text-xs text-slate-400 whitespace-nowrap">
+                  {{ formatDate(role.createdAt) }}
+                </td>
+                <td class="text-xs text-slate-500">{{ role.lastUpdatedBy || '--' }}</td>
+                <td class="text-xs text-slate-400 whitespace-nowrap">
+                  {{ formatDate(role.lastUpdatedAt) }}
+                </td>
+                <td>
+                  <div class="action-group">
+                    <button
+                      type="button"
+                      class="action-btn action-rose"
+                      [class.cursor-not-allowed]="isRoleDeleting(role.id)"
+                      [class.opacity-60]="isRoleDeleting(role.id)"
+                      [disabled]="isRoleDeleting(role.id)"
+                      (click)="deleteRole(role)"
+                    >
+                      @if (isRoleDeleting(role.id)) {
+                        Deleting...
+                      } @else {
+                        Delete
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isLoading()) {
+      <app-list-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [rowsPerPage]="rowsPerPage()"
+        [pageInfo]="pageInfo()"
+        (rowsPerPageChange)="setRowsPerPage($event)"
+        (prevPage)="prevPage()"
+        (nextPage)="nextPage()"
+        (goToPage)="goToPage($event)"
+      ></app-list-pagination>
+    }
   </section>
 </div>

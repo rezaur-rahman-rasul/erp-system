@@ -10,22 +10,22 @@
     </div>
   </article>
 
-  @if (metricLabel && metricValue !== '') {
-    <article class="count-card">
-      <div class="count-card-row">
-        <div>
-          <p class="count-card-label">{{ metricLabel }}</p>
-          <p class="count-card-value">{{ metricValue }}</p>
-        </div>
-
-        <div class="count-card-icon">
-          <app-lucide-icon name="chartNoAxesCombined" [size]="22" />
-        </div>
+@if (metricLabel && metricValue !== '') {
+  <article class="count-card">
+    <div class="count-card-row">
+      <div>
+        <p class="count-card-label">{{ metricLabel }}</p>
+        <p class="count-card-value">{{ metricValue }}</p>
       </div>
 
-      <div class="count-progress">
-        <div class="count-progress-fill"></div>
+      <div class="count-card-icon">
+        <app-lucide-icon name="chartNoAxesCombined" [size]="22" />
       </div>
-    </article>
-  }
+    </div>
+
+    <div class="count-progress">
+      <div class="count-progress-fill"></div>
+    </div>
+  </article>
+}
 </section>

@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { BaseHttpService } from '@hishab-nikash/shared-data-access';
 import { ApiResponse, AuthResponse, User } from '@hishab-nikash/shared-models';
-import { map, Observable, tap } from 'rxjs';
+import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -11,47 +11,59 @@ export class AuthService extends BaseHttpService {
   
   // Initialize state from Storage for instant reactivity
   currentUser = signal<User | null>(this.getStoredUser());
-  isAuthenticated = signal<boolean>(!!localStorage.getItem('access_token'));
+  isAuthenticated = signal<boolean>(this.hasAccessToken());
+
+  hasAccessToken(): boolean {
+    return !!this.getStorageItem('access_token');
+  }
 
   private getStoredUser(): User | null {
-    const data = localStorage.getItem('current_user');
+    const data = this.getStorageItem('current_user');
     return data ? JSON.parse(data) : null;
   }
 
   login(credentials: { identifier: string; password: string; tenantId: string }): Observable<AuthResponse> {
-    console.log('Attempting login with:', credentials);
     return this.post<ApiResponse<AuthResponse>>(`${this.AUTH_PATH}/login`, credentials).pipe(
-      map(res => {
-        console.log('Raw Login Response:', res);
-        return res.data;
-      }),
+      map(res => res.data),
       tap((res) => {
         if (res) {
-          console.log('Mapping Auth Response:', res);
           this.setSession(res);
-        } else {
-          console.error('No data found in login response');
         }
       })
     );
   }
 
   logout(): void {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    this.currentUser.set(null);
-    this.isAuthenticated.set(false);
-    this.post(`${this.AUTH_PATH}/logout`, {}).subscribe();
+    if (this.hasAccessToken()) {
+      this.post(`${this.AUTH_PATH}/logout`, {})
+        .pipe(catchError(() => of(null)))
+        .subscribe();
+    }
+
+    this.clearSession();
   }
 
   me(): Observable<User> {
     return this.get<ApiResponse<User>>(`${this.AUTH_PATH}/me`).pipe(
       map(res => res.data),
       tap((user) => {
+        this.setStorageItem('current_user', JSON.stringify(user));
         this.currentUser.set(user);
         this.isAuthenticated.set(true);
+      }),
+      catchError((error) => {
+        this.clearSession();
+        return throwError(() => error);
       })
     );
+  }
+
+  clearSession(): void {
+    this.removeStorageItem('access_token');
+    this.removeStorageItem('refresh_token');
+    this.removeStorageItem('current_user');
+    this.currentUser.set(null);
+    this.isAuthenticated.set(false);
   }
 
   private setSession(authResult: AuthResponse): void {
@@ -59,12 +71,27 @@ export class AuthService extends BaseHttpService {
     const token = (authResult as any).accessToken || authResult.access_token;
     const refresh = (authResult as any).refreshToken || authResult.refresh_token;
 
-    if (token) localStorage.setItem('access_token', token);
-    if (refresh) localStorage.setItem('refresh_token', refresh);
-    if (authResult.user) localStorage.setItem('current_user', JSON.stringify(authResult.user));
+    if (token) this.setStorageItem('access_token', token);
+    if (refresh) this.setStorageItem('refresh_token', refresh);
+    if (authResult.user) this.setStorageItem('current_user', JSON.stringify(authResult.user));
     
     this.currentUser.set(authResult.user);
     this.isAuthenticated.set(!!token);
-    console.log('Session secured. Token stored. Authenticated:', this.isAuthenticated());
+  }
+
+  private getStorageItem(key: string): string | null {
+    return typeof localStorage === 'undefined' ? null : localStorage.getItem(key);
+  }
+
+  private setStorageItem(key: string, value: string): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, value);
+    }
+  }
+
+  private removeStorageItem(key: string): void {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(key);
+    }
   }
 }

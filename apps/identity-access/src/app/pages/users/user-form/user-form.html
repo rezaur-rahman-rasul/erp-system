@@ -1,0 +1,302 @@
+<div class="user-form-page">
+  <div class="max-w-6xl mx-auto">
+
+    <!-- Header changes dynamically based on mode -->
+    @if (isEditMode()) {
+      <app-form-header
+        icon="pencil"
+        badge="Identity Management"
+        title="Edit User"
+        subtitle="Update the user's account details, tenant assignment, or role assignments."
+        actionText="Back to Users"
+        actionRoute="/iam/users"
+      ></app-form-header>
+    } @else {
+      <app-form-header
+        icon="userPlus"
+        badge="Identity Management"
+        title="Create New User"
+        subtitle="Fill in the details below to register a new user account."
+        actionText="Back to Users"
+        actionRoute="/iam/users"
+      ></app-form-header>
+    }
+
+    <!-- Loading state for edit mode -->
+    @if (isLoadingUser()) {
+      <div class="form-section flex items-center justify-center py-14 gap-3 text-slate-400">
+        <app-lucide-icon name="loader" [size]="22" class="animate-spin" />
+        <span class="text-sm font-semibold">Loading user data...</span>
+      </div>
+    }
+
+    @if (!isLoadingUser()) {
+      <form #userForm="ngForm" (ngSubmit)="saveUser(userForm)" novalidate>
+
+        <!-- Two-column layout: main form left, Roles sidebar right -->
+        <div class="form-layout">
+
+          <!-- LEFT COLUMN -->
+          <div class="form-main space-y-6">
+
+            <!-- Section 1: Identity -->
+            <div class="form-section">
+              <div class="form-section-title">
+                <app-lucide-icon name="idCard" [size]="18" />
+                <span>Identity</span>
+              </div>
+              <div class="form-grid">
+
+                <div class="form-field">
+                  <label class="field-label" for="displayName">
+                    Display Name <span class="required-star">*</span>
+                  </label>
+                  <input
+                    id="displayName" name="displayName" type="text"
+                    class="form-input"
+                    [(ngModel)]="form.displayName"
+                    required maxlength="150"
+                    placeholder="e.g. John Doe"
+                    #displayNameCtrl="ngModel"
+                  />
+                  @if (displayNameCtrl.invalid && displayNameCtrl.touched) {
+                    <span class="field-error">Display name is required.</span>
+                  }
+                </div>
+
+                <div class="form-field">
+                  <label class="field-label" for="username">
+                    Username <span class="required-star">*</span>
+                  </label>
+                  <input
+                    id="username" name="username" type="text"
+                    class="form-input"
+                    [(ngModel)]="form.username"
+                    required maxlength="60"
+                    placeholder="e.g. johndoe"
+                    #usernameCtrl="ngModel"
+                  />
+                  @if (usernameCtrl.invalid && usernameCtrl.touched) {
+                    <span class="field-error">Username is required (max 60 chars).</span>
+                  }
+                </div>
+
+                <div class="form-field col-span-full">
+                  <label class="field-label" for="email">
+                    Email Address <span class="required-star">*</span>
+                  </label>
+                  <input
+                    id="email" name="email" type="email"
+                    class="form-input"
+                    [(ngModel)]="form.email"
+                    required email maxlength="120"
+                    placeholder="john@example.com"
+                    #emailCtrl="ngModel"
+                  />
+                  @if (emailCtrl.invalid && emailCtrl.touched) {
+                    <span class="field-error">A valid email address is required.</span>
+                  }
+                </div>
+
+              </div>
+            </div>
+
+            @if (!isEditMode()) {
+              <!-- Section 2: Security -->
+              <div class="form-section">
+                <div class="form-section-title">
+                  <app-lucide-icon name="lock" [size]="18" />
+                  <span>Security</span>
+                </div>
+                <div class="form-grid">
+
+                  <div class="form-field">
+                    <label class="field-label" for="password">
+                      Password <span class="required-star">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                      <input
+                        id="password" name="password"
+                        [type]="showPassword ? 'text' : 'password'"
+                        class="form-input pr-12"
+                        [(ngModel)]="form.password"
+                        required
+                        minlength="8" maxlength="120"
+                        placeholder="Min 8 characters"
+                        #passwordCtrl="ngModel"
+                      />
+                      <button type="button" class="eye-btn" (click)="showPassword = !showPassword" tabindex="-1">
+                        <app-lucide-icon [name]="showPassword ? 'eyeOff' : 'eye'" [size]="16" />
+                      </button>
+                    </div>
+                    @if (passwordCtrl.invalid && passwordCtrl.touched) {
+                      <span class="field-error">Password must be at least 8 characters.</span>
+                    }
+                  </div>
+
+                  <div class="form-field">
+                    <label class="field-label" for="confirmPassword">
+                      Confirm Password <span class="required-star">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                      <input
+                        id="confirmPassword" name="confirmPassword"
+                        [type]="showPassword ? 'text' : 'password'"
+                        class="form-input"
+                        [(ngModel)]="form.confirmPassword"
+                        required
+                        placeholder="Re-enter password"
+                      />
+                    </div>
+                    @if (form.confirmPassword && !passwordsMatch) {
+                      <span class="field-error">Passwords do not match.</span>
+                    }
+                    @if (form.confirmPassword && passwordsMatch && form.password.length >= 8) {
+                      <span class="field-success">Passwords match.</span>
+                    }
+                  </div>
+
+                </div>
+              </div>
+            } @else {
+              <div class="form-section">
+                <div class="form-section-title">
+                  <app-lucide-icon name="shieldAlert" [size]="18" />
+                  <span>Account Lifecycle</span>
+                </div>
+                <p class="text-sm font-semibold text-slate-600">
+                  This form uses the main user update API only.
+                </p>
+                <p class="mt-3 text-sm text-slate-500">
+                  User status changes are handled from the users list through the separate status update endpoint.
+                </p>
+              </div>
+            }
+
+            <!-- Section 3: Organisation -->
+            <div class="form-section">
+              <div class="form-section-title">
+                <app-lucide-icon name="building2" [size]="18" />
+                <span>Organisation</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="field-label" for="tenantId">
+                    Tenant ID <span class="required-star">*</span>
+                  </label>
+                  <input
+                    id="tenantId" name="tenantId" type="text"
+                    class="form-input"
+                    [(ngModel)]="form.tenantId"
+                    required maxlength="80"
+                    placeholder="e.g. ERP-DEFAULT"
+                    #tenantCtrl="ngModel"
+                  />
+                  @if (tenantCtrl.invalid && tenantCtrl.touched) {
+                    <span class="field-error">Tenant ID is required.</span>
+                  }
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /LEFT COLUMN -->
+
+          <!-- RIGHT COLUMN – Roles sidebar -->
+          <aside class="form-sidebar">
+            <div class="form-section h-full">
+              <div class="form-section-title">
+                <app-lucide-icon name="shieldCheck" [size]="18" />
+                <span>Roles <span class="required-star">*</span></span>
+              </div>
+              <p class="text-xs text-slate-400 mb-5">
+                Select one or more roles to assign to this user.
+              </p>
+
+              @if (isLoadingRoles()) {
+                <div class="flex flex-col gap-3">
+                  @for (s of [1,2,3]; track s) {
+                    <div class="skeleton-cell h-10 w-full rounded-2xl"></div>
+                  }
+                </div>
+              }
+
+              @if (!isLoadingRoles()) {
+                @if (availableRoles().length === 0) {
+                  <p class="text-sm text-slate-400 italic">No roles available.</p>
+                } @else {
+                  <div class="role-grid-vertical">
+                    @for (role of availableRoles(); track role.id) {
+                      <button
+                        type="button"
+                        class="role-chip"
+                        [class.role-chip-selected]="isRoleSelected(role.id)"
+                        (click)="toggleRole(role.id)"
+                      >
+                        <app-lucide-icon [name]="isRoleSelected(role.id) ? 'checkCircle' : 'circle'" [size]="15" />
+                        {{ role.name }}
+                      </button>
+                    }
+                  </div>
+                }
+              }
+
+              <!-- Roles summary -->
+              @if (selectedRoleIds().size > 0) {
+                <div class="mt-6 rounded-2xl bg-indigo-50 border border-indigo-100 px-4 py-3">
+                  <p class="text-[11px] font-black uppercase tracking-widest text-indigo-400 mb-2">Selected</p>
+                  <p class="text-sm font-bold text-indigo-700">{{ selectedRoleIds().size }} role(s) assigned</p>
+                </div>
+              }
+            </div>
+          </aside>
+
+        </div><!-- /form-layout -->
+
+        <!-- Form Actions -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pt-4">
+          <div class="flex items-center gap-3">
+            @if (isEditMode()) {
+              <button type="submit" class="btn btn-warning" [disabled]="isSubmitting">
+                @if (isSubmitting) {
+                  <app-lucide-icon name="loader" [size]="16" class="animate-spin" />
+                  <span>Updating...</span>
+                } @else {
+                  <app-lucide-icon name="save" [size]="16" />
+                  <span>Update User</span>
+                }
+              </button>
+            } @else {
+              <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+                @if (isSubmitting) {
+                  <app-lucide-icon name="loader" [size]="16" class="animate-spin" />
+                  <span>Creating...</span>
+                } @else {
+                  <app-lucide-icon name="userPlus" [size]="16" />
+                  <span>Create User</span>
+                }
+              </button>
+            }
+            <a routerLink="/iam/users" class="btn btn-secondary">
+              <app-lucide-icon name="x" [size]="16" />
+              Cancel
+            </a>
+          </div>
+
+          @if (successMessage) {
+            <div class="feedback-success">
+              <app-lucide-icon name="checkCircle" [size]="16" />
+              {{ successMessage }}
+            </div>
+          }
+          @if (errorMessage) {
+            <div class="feedback-error">
+              <app-lucide-icon name="alertCircle" [size]="16" />
+              {{ errorMessage }}
+            </div>
+          }
+        </div>
+
+      </form>
+    }
+  </div>
+</div>

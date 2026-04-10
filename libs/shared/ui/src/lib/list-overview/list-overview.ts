@@ -15,4 +15,11 @@ export class ListOverview {
   @Input() metricLabel = '';
   @Input() metricValue: string | number = '';
   @Input() icon = 'layoutDashboard';
+
+  @Input() guidanceTitle = 'Guidelines';
+  @Input() guidanceItems: string[] = [
+    'View and manage records efficiently.',
+    'Filter data using the inputs in each column.',
+    'Click headers to sort the table data.',
+  ];
 }

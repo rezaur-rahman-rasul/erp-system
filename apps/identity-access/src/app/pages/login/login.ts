@@ -15,6 +15,8 @@ import { finalize } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {
+  readonly currentYear = new Date().getFullYear();
+
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -28,7 +30,6 @@ export class LoginComponent {
     const authService = inject(AuthService);
     const router = inject(Router);
     if (authService.isAuthenticated()) {
-      console.log('User already authenticated, redirecting to dashboard...');
       router.navigate(['/dashboard']);
     }
   }
@@ -55,17 +56,11 @@ export class LoginComponent {
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: () => {
-          console.log('Login success. Token valid.');
-          // Redirecting to the real users list path as per developer feedback
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/iam/users';
-          console.log('Navigating to users component at:', returnUrl);
-          
-          this.router.navigateByUrl(returnUrl).then(success => {
-            if (!success) console.error('Redirect failed. Check if route /iam/users or dashboard is correct.');
-          });
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/iam/dashboard';
+
+          this.router.navigateByUrl(returnUrl);
         },
         error: (err) => {
-          console.error('Login Error Block:', err);
           this.errorMessage.set(err.error?.message || 'Login failed. Please check your credentials.');
         }
       });

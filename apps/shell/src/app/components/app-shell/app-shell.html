@@ -1,6 +1,4 @@
-<div
-  class="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(37,99,235,0.10),_transparent_28%),linear-gradient(180deg,#eef2f7,#f8fafc_30%,#f8fafc)] text-slate-900"
->
+<div class="min-h-screen bg-slate-100 text-slate-900">
   <!-- Backdrop -->
   <div
     id="sidebarBackdrop"
@@ -15,7 +13,7 @@
     <!-- Sidebar -->
     <aside
       id="sidebar"
-      class="fixed top-0 left-0 z-40 h-screen bg-slate-950 text-slate-100 shadow-2xl border-r border-white/10 transition-all duration-300 ease-in-out flex flex-col"
+      class="fixed top-0 left-0 z-40 h-screen bg-slate-950 text-slate-100 shadow-[4px_0_24px_-4px_rgba(15,23,42,0.25)] border-r border-slate-800/80 transition-all duration-300 ease-out flex flex-col"
       [class.-translate-x-full]="!isDesktop() && !isMobileOpen()"
       [class.translate-x-0]="isDesktop() || isMobileOpen()"
       [class.w-72]="!isCollapsed()"
@@ -24,7 +22,7 @@
     >
       <!-- Brand -->
       <div
-        class="h-20 px-5 flex items-center border-b border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950"
+        class="h-[4.5rem] px-5 flex items-center border-b border-slate-800/90 bg-slate-950"
       >
         <div
           class="brand-wrapper flex items-center gap-4 w-full"
@@ -33,7 +31,7 @@
           <button
             id="sidebarToggle"
             type="button"
-            class="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-slate-700 bg-slate-900 text-white hover:bg-slate-800 transition-all duration-300"
+            class="btn-sidebar"
             (click)="toggleSidebar()"
           >
             <svg
@@ -76,7 +74,7 @@
         [class.hidden]="isDesktop() && isCollapsed()"
       >
         <div
-          class="relative rounded-2xl border border-white/10 bg-white/5 px-3 py-2 flex items-center gap-2 focus-within:bg-white/10 focus-within:border-blue-500/50 transition-all duration-200"
+          class="relative rounded-xl border border-slate-700/80 bg-slate-900/50 px-3 py-2 flex items-center gap-2 focus-within:border-blue-500 focus-within:bg-slate-900 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all duration-200"
         >
           <app-lucide-icon name="search" [size]="16" class="text-slate-500" />
           <input
@@ -92,18 +90,18 @@
         @for (item of navItems; track item.path) {
           <a
             [routerLink]="[item.path]"
-            routerLinkActive="bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_18px_40px_-25px_rgba(15,23,42,0.95)]"
+            routerLinkActive="bg-slate-800/90 text-white border border-slate-600/80 shadow-sm"
             [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
-            class="nav-item group relative flex items-center gap-3 rounded-2xl px-3 py-3 text-slate-300 hover:text-white hover:bg-white/5 transition-all duration-200"
+            class="nav-item group relative flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-slate-400 hover:border-slate-700 hover:bg-slate-800/60 hover:text-white transition-all duration-200"
             [class.justify-center]="isDesktop() && isCollapsed()"
           >
             <span
-              class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-blue-500 opacity-0 group-hover:opacity-100 transition"
+              class="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
               routerLinkActive="opacity-100"
             ></span>
             <span
-              class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/80 border border-white/5 text-slate-200 group-hover:bg-blue-600/15 group-hover:text-blue-400 transition"
-              routerLinkActive="bg-blue-600/20 text-blue-400 border-blue-500/30"
+              class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 border border-slate-700/80 text-slate-300 group-hover:border-slate-600 group-hover:text-white transition-colors duration-200"
+              routerLinkActive="border-blue-500/60 bg-slate-800 text-blue-400"
             >
               <app-lucide-icon [name]="item.icon" [size]="18" />
             </span>
@@ -118,12 +116,12 @@
       </nav>
 
       <!-- Sidebar Footer -->
-      <div class="mt-auto border-t border-white/10 p-4">
-        <div 
-          class="group flex items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-white/5"
+      <div class="mt-auto border-t border-slate-800/90 p-4">
+        <div
+          class="group flex items-center gap-3 rounded-xl border border-transparent p-2 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800/50"
           [class.justify-center]="isCollapsed()"
         >
-          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-500/20">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-blue-600/30 bg-blue-600 text-sm font-bold text-white shadow-sm">
             {{ currentUser()?.displayName?.charAt(0) || 'U' }}
           </div>
           
@@ -132,9 +130,10 @@
             <span class="truncate text-xs text-slate-500">{{ currentUser()?.email || 'Not logged in' }}</span>
           </div>
 
-          <button 
+          <button
+            type="button"
             (click)="logout()"
-            class="footer-content group/logout rounded-lg p-2 text-slate-500 transition-colors hover:bg-rose-500/10 hover:text-rose-500"
+            class="footer-content btn-footer-icon"
             [class.hidden]="isCollapsed()"
             title="Sign Out"
           >
@@ -149,6 +148,53 @@
       [class.lg:ml-72]="isDesktop() && !isCollapsed()"
       [class.lg:ml-24]="isDesktop() && isCollapsed()"
     >
+      <!-- Top header -->
+      <header class="app-header">
+        <div class="app-header-inner">
+          <div class="app-header-left">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h1 class="app-header-title">{{ pageTitle }}</h1>
+                @if (currentUser()?.tenantId) {
+                  <span class="app-tenant-pill">
+                    <app-lucide-icon name="building2" [size]="14" />
+                    <span class="truncate">{{ currentUser()?.tenantId }}</span>
+                  </span>
+                }
+              </div>
+              <p class="app-header-subtitle">
+                Identity &amp; Access Console
+              </p>
+            </div>
+          </div>
+
+          <div class="app-header-right">
+            <div class="app-header-search">
+              <app-lucide-icon name="search" [size]="16" class="text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search users, roles, policies…"
+                class="app-header-search-input"
+              />
+            </div>
+
+            <button type="button" class="app-header-icon-btn" title="Notifications" aria-label="Notifications">
+              <app-lucide-icon name="bell" [size]="18" />
+            </button>
+
+            <div class="app-header-user">
+              <div class="app-header-avatar" aria-hidden="true">
+                {{ currentUser()?.displayName?.charAt(0) || 'U' }}
+              </div>
+              <div class="hidden sm:block min-w-0">
+                <div class="app-header-user-name">{{ currentUser()?.displayName || 'Guest User' }}</div>
+                <div class="app-header-user-email">{{ currentUser()?.email || 'Not logged in' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
       <main class="w-full h-full px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
         <router-outlet />
       </main>

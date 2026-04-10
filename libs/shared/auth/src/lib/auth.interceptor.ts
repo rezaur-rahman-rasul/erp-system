@@ -5,7 +5,10 @@ export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
-  const token = localStorage.getItem('access_token');
+  const token =
+    typeof localStorage === 'undefined'
+      ? null
+      : localStorage.getItem('access_token');
 
   if (token) {
     const cloned = req.clone({

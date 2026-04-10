@@ -1,17 +1,59 @@
 /* Shared List and Table Styles */
 
 .orders-page {
-  @apply space-y-6;
+  @apply space-y-8;
 }
+
+/* Skeleton loader */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.skeleton-cell {
+  height: 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-row td {
+  @apply border-b border-slate-100 px-3 py-4 align-middle;
+  border-right: 1px solid rgb(241 245 249);
+}
+
+.skeleton-row:nth-child(even) {
+  background: rgb(248 250 252);
+}
+
+.data-rows-container tr {
+  animation: fade-in 0.25s ease both;
+}
+
+.data-rows-container tr:nth-child(1) { animation-delay: 0ms; }
+.data-rows-container tr:nth-child(2) { animation-delay: 30ms; }
+.data-rows-container tr:nth-child(3) { animation-delay: 60ms; }
+.data-rows-container tr:nth-child(4) { animation-delay: 90ms; }
+.data-rows-container tr:nth-child(5) { animation-delay: 120ms; }
+.data-rows-container tr:nth-child(6) { animation-delay: 150ms; }
+.data-rows-container tr:nth-child(7) { animation-delay: 180ms; }
+.data-rows-container tr:nth-child(8) { animation-delay: 210ms; }
+.data-rows-container tr:nth-child(9) { animation-delay: 240ms; }
+.data-rows-container tr:nth-child(10) { animation-delay: 270ms; }
 
 /* Table shell */
 .table-shell {
   width: 100%;
   overflow: hidden;
   border: 1px solid rgb(226 232 240);
-  border-radius: 24px;
+  border-radius: 28px;
   background: white;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .table-shell-header {
@@ -34,7 +76,7 @@
 /* Table */
 .orders-table {
   width: 100%;
-  min-width: 1200px; /* Adjusted from 1400px to be a bit more flexible */
+  min-width: 1200px;
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 13px;
@@ -42,7 +84,7 @@
 }
 
 .orders-table thead tr:first-child th {
-  @apply border-b border-slate-200 bg-slate-100 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-700;
+  @apply border-b border-slate-200 bg-slate-100 px-3 py-3 text-[11px] font-black uppercase tracking-widest text-slate-900;
   border-right: 1px solid rgb(226 232 240);
 }
 
@@ -60,7 +102,9 @@
 }
 
 .th-btn {
-  @apply inline-flex w-full items-center gap-1 text-left;
+  @apply -mx-1 inline-flex w-full cursor-pointer items-center gap-1.5 rounded-lg px-1.5 py-1.5 text-left transition-all duration-300;
+  @apply text-slate-800 hover:bg-slate-100 hover:text-slate-900;
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1;
 }
 
 .th-btn-right {
@@ -72,17 +116,21 @@
 }
 
 .sort-icon {
-  @apply text-[10px] text-blue-400;
+  @apply inline-flex items-center text-blue-400 opacity-60;
+}
+
+.th-btn:hover .sort-icon {
+  @apply text-blue-600 opacity-100;
 }
 
 .filter-input {
-  @apply w-full rounded-[10px] border border-slate-300 bg-white px-3 py-1.5 text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100;
+  @apply w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100;
 }
 
 .data-row td {
-  @apply border-b border-slate-200 px-3 py-2.5 align-middle;
+  @apply border-b border-slate-200 px-3 py-3 align-middle;
   border-right: 1px solid rgb(226 232 240);
-  line-height: 1.2;
+  line-height: 1.4;
 }
 
 .data-row td:last-child {
@@ -98,31 +146,23 @@
 }
 
 .data-row:hover {
-  background: rgba(239, 246, 255, 0.9);
+  background: rgba(239, 246, 255, 0.7);
 }
 
 .order-link {
-  @apply inline-flex items-center gap-1.5 font-medium text-slate-800 transition hover:text-blue-600;
+  @apply inline-flex items-center gap-1.5 font-bold text-slate-800 transition hover:text-blue-600;
+}
+
+.cell-ellipsis {
+  @apply block max-w-full truncate whitespace-nowrap;
 }
 
 .amount {
   @apply text-right whitespace-nowrap;
 }
 
-.total-amount {
-  @apply font-semibold text-blue-600;
-}
-
-.paid-amount {
-  @apply text-emerald-600;
-}
-
-.due-amount {
-  @apply font-semibold text-rose-600;
-}
-
 .status-badge {
-  @apply inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[10px] font-semibold leading-none;
+  @apply inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-tighter;
 }
 
 .status-new {
@@ -150,19 +190,21 @@
 }
 
 .action-btn {
-  @apply rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-white transition;
+  @apply inline-flex cursor-pointer items-center justify-center rounded-lg px-3 py-1.5 text-[11px] font-semibold text-white shadow-md transition-all duration-300;
+  @apply hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.97];
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 focus-visible:ring-offset-1;
 }
 
 .action-amber {
-  @apply bg-amber-500 hover:bg-amber-600;
+  @apply border-amber-600 bg-amber-500 shadow-amber-500/20 hover:border-amber-700 hover:bg-amber-600;
 }
 
 .action-emerald {
-  @apply bg-emerald-500 hover:bg-emerald-600;
+  @apply border-emerald-700 bg-emerald-600 shadow-emerald-600/15 hover:border-emerald-800 hover:bg-emerald-700;
 }
 
 .action-rose {
-  @apply bg-rose-500 hover:bg-rose-600;
+  @apply border-rose-700 bg-rose-600 shadow-rose-500/20 hover:border-rose-800 hover:bg-rose-700;
 }
 
 /* Empty states */
@@ -171,7 +213,7 @@
 }
 
 .empty-icon {
-  @apply mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-500;
+  @apply mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-400;
 }
 
 .empty-title {
@@ -183,7 +225,7 @@
 }
 
 .empty-row-cell {
-  @apply px-6 py-14 text-center;
+  @apply px-6 py-20 text-center;
 }
 
 .empty-state-inline {
