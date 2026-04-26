@@ -1,0 +1,141 @@
+@reference "../../../../styles.scss";
+
+:host {
+  @apply block;
+}
+
+.organization-dashboard {
+  @apply space-y-6;
+}
+
+.hero-card {
+  @apply grid gap-6 overflow-hidden p-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] lg:p-8;
+  background-image:
+    radial-gradient(circle at top left, rgba(14, 116, 144, 0.14), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.12), transparent 28%),
+    linear-gradient(135deg, rgba(255, 251, 235, 0.92) 0%, rgba(255, 255, 255, 0.95) 56%);
+}
+
+.hero-grid {
+  @apply contents;
+}
+
+.hero-copy {
+  @apply flex flex-col;
+}
+
+.hero-copy__eyebrow {
+  @apply inline-flex w-fit items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.22em] text-brand-700;
+}
+
+.hero-copy h1 {
+  @apply mt-5 text-4xl font-semibold tracking-tight text-slate-950 lg:text-[3.15rem];
+}
+
+.hero-copy p:last-child {
+  @apply mt-4 max-w-3xl text-sm leading-7 text-slate-600;
+}
+
+.hero-badges {
+  @apply mt-6 flex flex-wrap gap-3;
+}
+
+.hero-badge {
+  @apply inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm;
+}
+
+.hero-badge--strong {
+  @apply border-brand-200 bg-brand-50 text-brand-700;
+}
+
+.hero-panel {
+  @apply rounded-[28px] border border-slate-200/80 bg-slate-950 p-6 text-slate-200 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.9)];
+}
+
+.hero-panel__title {
+  @apply text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700/70;
+}
+
+.hero-panel h2 {
+  @apply mt-3 text-2xl font-semibold tracking-tight text-white;
+}
+
+.hero-panel__copy {
+  @apply mt-3 text-sm leading-7 text-slate-400;
+}
+
+.hero-panel__stats {
+  @apply mt-6 grid gap-3 sm:grid-cols-2;
+}
+
+.hero-panel__stat {
+  @apply rounded-[22px] border border-white/10 bg-white/[0.04] p-4;
+}
+
+.hero-panel__stat span {
+  @apply text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500;
+}
+
+.hero-panel__stat strong {
+  @apply mt-3 block text-3xl font-semibold tracking-tight text-white;
+}
+
+.summary-grid {
+  @apply grid gap-4 md:grid-cols-2 xl:grid-cols-5;
+}
+
+.insight-grid {
+  @apply grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_380px];
+}
+
+.insight-card {
+  @apply p-6;
+}
+
+.insight-list {
+  @apply mt-6 space-y-3;
+}
+
+.insight-row {
+  @apply flex items-center justify-between gap-4 rounded-[22px] border border-slate-200/80 bg-slate-50/80 px-4 py-3;
+}
+
+.insight-row__copy strong {
+  @apply block text-sm font-semibold text-slate-900;
+}
+
+.insight-row__copy span {
+  @apply mt-1 block text-xs text-slate-500;
+}
+
+.insight-row__metric {
+  @apply text-sm font-semibold text-brand-700;
+}
+
+.section-stack {
+  @apply space-y-4;
+}
+
+.activity-card {
+  @apply rounded-[24px] border border-slate-200/80 bg-white/80 p-4;
+}
+
+.activity-card__top {
+  @apply flex items-start justify-between gap-3;
+}
+
+.activity-card__title {
+  @apply text-sm font-semibold text-slate-900;
+}
+
+.activity-card__meta {
+  @apply mt-1 text-xs text-slate-500;
+}
+
+.activity-card__list {
+  @apply mt-4 flex flex-wrap gap-2;
+}
+
+.empty-panel {
+  @apply flex min-h-[220px] items-center justify-center rounded-[26px] border border-dashed border-slate-300 bg-slate-50/80 p-6 text-sm text-slate-500;
+}

@@ -1,5 +1,8 @@
 import { Injectable, signal } from '@angular/core';
-import { BaseHttpService } from '@hishab-nikash/shared-data-access';
+import {
+  BaseHttpService,
+  resolveServiceBaseUrl,
+} from '@hishab-nikash/shared-data-access';
 import { ApiResponse, AuthResponse, User } from '@hishab-nikash/shared-models';
 import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 
@@ -7,7 +10,7 @@ import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService extends BaseHttpService {
-  private readonly AUTH_PATH = '/api/v1/auth';
+  private readonly AUTH_PATH = `${resolveServiceBaseUrl('identity')}/api/v1/auth`;
   
   // Initialize state from Storage for instant reactivity
   currentUser = signal<User | null>(this.getStoredUser());

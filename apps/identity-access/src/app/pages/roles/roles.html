@@ -2,40 +2,47 @@
   <app-list-header
     icon="shieldCheck"
     badge="Access Control"
-    title="Roles List"
-    subtitle="Manage role definitions, permission bundles, and access coverage efficiently."
-    actionText="Add Role"
+    title="Roles"
+    subtitle="Manage roles and the permissions each role includes."
+    actionText="Create Role"
     actionRoute="/iam/roles/create"
   ></app-list-header>
 
   <app-list-overview
     icon="layoutDashboard"
-    title="Roles Overview"
-    subtitle="Track all application roles, their descriptions, and permission bundles."
-    metricLabel="Total Roles"
+    title="Role overview"
+    subtitle="Review which roles are configured and what permissions each role includes."
+    metricLabel="Visible Roles"
     [metricValue]="totalRolesCount()"
+    guidanceTitle="Quick notes"
+    [guidanceItems]="guidanceItems"
   ></app-list-overview>
 
   <section class="table-shell">
     <div class="table-shell-header">
       <div>
-        <h2 class="table-shell-title">Roles List</h2>
-        <p class="table-shell-subtitle">Role records and permission coverage</p>
+        <h2 class="table-shell-title">Roles list</h2>
+        <p class="table-shell-subtitle">
+          Review role descriptions and the permissions each role includes.
+        </p>
       </div>
-      <div class="flex flex-wrap items-center justify-end gap-2">
+
+      <div class="records-toolbar">
+        <div class="records-toolbar__chips">
+          <span class="records-toolbar__chip">{{ configuredRolesCount() }} configured</span>
+          <span class="records-toolbar__chip">{{ emptyRolesCount() }} empty</span>
+          <span class="records-toolbar__chip">{{ highCoverageRolesCount() }} high coverage</span>
+          <span class="records-toolbar__chip">{{ totalPermissionsCount() }} unique permissions</span>
+        </div>
+
         @if (actionMessage()) {
-          <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+          <div class="records-feedback records-feedback--success">
             {{ actionMessage() }}
           </div>
         }
-        <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
-          {{ configuredRolesCount() }} configured roles
-        </div>
-        <div class="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">
-          {{ totalPermissionsCount() }} unique permissions
-        </div>
+
         @if (actionError()) {
-          <div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
+          <div class="records-feedback records-feedback--danger">
             {{ actionError() }}
           </div>
         }
@@ -46,7 +53,7 @@
       <table class="orders-table">
         <thead>
           <tr>
-            <th style="width: 50px" class="text-center">Sl.</th>
+            <th class="text-center" style="width: 56px">Sl.</th>
             <th>
               <button type="button" class="th-btn" (click)="toggleSort('code')">
                 <span>Code</span>
@@ -71,7 +78,11 @@
               </span>
             </th>
             <th class="text-center">
-              <button type="button" class="th-btn th-btn-center" (click)="toggleSort('permissionCount')">
+              <button
+                type="button"
+                class="th-btn th-btn-center"
+                (click)="toggleSort('permissionCount')"
+              >
                 <span>Coverage</span>
                 <span class="sort-icon">{{ sortIcon('permissionCount') }}</span>
               </button>
@@ -109,7 +120,7 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Code"
+                placeholder="Filter code"
                 [value]="filters().code"
                 (input)="setFilter('code', $any($event.target).value)"
               />
@@ -118,7 +129,7 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Role Name"
+                placeholder="Filter role name"
                 [value]="filters().name"
                 (input)="setFilter('name', $any($event.target).value)"
               />
@@ -127,7 +138,7 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Description"
+                placeholder="Filter description"
                 [value]="filters().description"
                 (input)="setFilter('description', $any($event.target).value)"
               />
@@ -136,16 +147,17 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Permission"
+                placeholder="Filter permission"
                 [value]="filters().permission"
                 (input)="setFilter('permission', $any($event.target).value)"
               />
             </th>
+            <th></th>
             <th>
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Creator"
+                placeholder="Filter creator"
                 [value]="filters().createdBy"
                 (input)="setFilter('createdBy', $any($event.target).value)"
               />
@@ -162,7 +174,7 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Updater"
+                placeholder="Filter updater"
                 [value]="filters().lastUpdatedBy"
                 (input)="setFilter('lastUpdatedBy', $any($event.target).value)"
               />
@@ -175,7 +187,6 @@
                 (input)="setFilter('lastUpdatedAt', $any($event.target).value)"
               />
             </th>
-            <th></th>
             <th></th>
           </tr>
         </thead>
@@ -206,9 +217,9 @@
                   <div class="empty-icon">
                     <app-lucide-icon name="shieldAlert" [size]="28" />
                   </div>
-                  <h3 class="empty-title">No roles found</h3>
+                  <h3 class="empty-title">No roles matched the current filters</h3>
                   <p class="empty-subtitle">
-                    Try changing your filters or add roles in the backend first.
+                    Adjust the filters or create a new role.
                   </p>
                 </div>
               </td>
@@ -218,34 +229,37 @@
           @if (!isLoading()) {
             @for (role of pagedRoles(); track trackRole($index, role); let i = $index) {
               <tr class="data-row">
-                <td class="text-center text-slate-500 text-xs font-semibold tabular-nums">
-                  {{ serialOf(i) }}
-                </td>
+                <td class="records-serial">{{ serialOf(i) }}</td>
+
                 <td>
                   <a
                     class="order-link"
                     [routerLink]="['/iam/roles', role.id, 'edit']"
-                    title="Click to edit"
+                    title="Edit role"
                   >
                     <span>{{ role.code }}</span>
                     <app-lucide-icon name="sparkles" [size]="14" />
                   </a>
                 </td>
+
                 <td>
-                  <div class="flex flex-col gap-1">
-                    <span class="font-bold text-slate-800">{{ role.name }}</span>
-                    <span class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      Permission Bundle
-                    </span>
+                  <div class="records-primary">
+                    <span class="records-primary__title">{{ role.name }}</span>
+                    <span class="records-primary__meta">Permission set</span>
                   </div>
                 </td>
+
                 <td>
-                  <span class="cell-ellipsis" [title]="role.description || 'No description provided'">
+                  <span
+                    class="cell-ellipsis"
+                    [title]="role.description || 'No description provided'"
+                  >
                     {{ role.description || 'No description provided' }}
                   </span>
                 </td>
+
                 <td>
-                  <div class="flex flex-wrap gap-1">
+                  <div class="records-tags">
                     @if (role.permissions.length === 0) {
                       <span class="status-badge status-new">No permissions</span>
                     } @else {
@@ -260,24 +274,21 @@
                     }
                   </div>
                 </td>
+
                 <td class="text-center">
-                  <div class="flex flex-col items-center gap-1">
+                  <div class="records-coverage">
                     <span class="status-badge" [class]="permissionCountClass(role)">
                       {{ permissionCountLabel(role) }}
                     </span>
-                    <span class="text-[11px] text-slate-400">
-                      Total mapped access
-                    </span>
+                    <span class="records-muted">Assigned access</span>
                   </div>
                 </td>
-                <td class="text-xs text-slate-500">{{ role.createdBy || '--' }}</td>
-                <td class="text-xs text-slate-400 whitespace-nowrap">
-                  {{ formatDate(role.createdAt) }}
-                </td>
-                <td class="text-xs text-slate-500">{{ role.lastUpdatedBy || '--' }}</td>
-                <td class="text-xs text-slate-400 whitespace-nowrap">
-                  {{ formatDate(role.lastUpdatedAt) }}
-                </td>
+
+                <td class="records-muted">{{ role.createdBy || '--' }}</td>
+                <td class="records-muted">{{ formatDate(role.createdAt) }}</td>
+                <td class="records-muted">{{ role.lastUpdatedBy || '--' }}</td>
+                <td class="records-muted">{{ formatDate(role.lastUpdatedAt) }}</td>
+
                 <td>
                   <div class="action-group">
                     <button

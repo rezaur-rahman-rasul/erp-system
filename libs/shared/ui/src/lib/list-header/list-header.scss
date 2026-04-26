@@ -1,16 +1,15 @@
 @reference "../../../../../apps/shell/src/styles.scss";
 
 :host {
-  display: block;
+  @apply block;
 }
 
 .list-header-card {
-  @apply relative flex flex-col gap-5 overflow-hidden rounded-[28px] border border-slate-200 bg-white px-6 py-6 shadow-sm lg:flex-row lg:items-center lg:justify-between lg:px-8;
+  @apply relative flex flex-col gap-6 overflow-hidden p-6 lg:flex-row lg:items-end lg:justify-between lg:p-8;
 }
 
-.list-header-card::before {
-  content: '';
-  @apply pointer-events-none absolute inset-0 bg-blue-50/40;
+.list-header-glow {
+  @apply pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-brand-100/60 via-white/0 to-sand-100/50;
 }
 
 .list-header-content,
@@ -22,19 +21,30 @@
   @apply flex items-start gap-5;
 }
 
+.list-header-copy {
+  @apply min-w-0;
+}
+
 .list-header-icon {
-  @apply flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-200;
+  @apply flex h-16 w-16 items-center justify-center rounded-[24px] border border-brand-200 bg-brand-600 text-white shadow-lg shadow-brand-700/20;
 }
 
 .list-header-badge {
-  @apply inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-blue-700 ring-1 ring-inset ring-blue-200;
+  @apply inline-flex items-center rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-brand-700;
 }
 
 .list-header-title {
-  @apply mt-4 text-2xl font-black tracking-tight text-slate-900 md:text-3xl;
+  @apply mt-4 text-3xl font-semibold tracking-tight text-slate-900;
 }
 
 .list-header-subtitle {
-  @apply mt-2 max-w-2xl text-sm font-medium text-slate-500 md:text-base;
+  @apply mt-3 max-w-3xl text-sm leading-6 text-slate-600;
 }
 
+.list-header-actions {
+  @apply flex flex-col items-start gap-3 lg:items-end;
+}
+
+.list-header-note {
+  @apply text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500;
+}

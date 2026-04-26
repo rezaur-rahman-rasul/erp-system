@@ -25,6 +25,16 @@ export const appRoutes: Route[] = [
         path: 'iam',
         loadChildren: () =>
           import('identityAccess/Routes').then((m) => m!.remoteRoutes),
+      },
+      {
+        path: 'org',
+        loadChildren: () =>
+          import('identityAccess/Routes').then((m) => m!.organizationRoutes),
+      },
+      {
+        path: 'master',
+        loadChildren: () =>
+          import('identityAccess/Routes').then((m) => m!.masterDataRoutes),
       }
     ]
   },

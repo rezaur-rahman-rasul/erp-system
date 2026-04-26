@@ -1,0 +1,143 @@
+<div class="organization-page page-shell">
+  <app-list-header
+    icon="network"
+    badge="Organization Setup"
+    title="Departments"
+    subtitle="Maintain department ownership, reporting structure, and operating status."
+    actionText="Create Department"
+    actionRoute="/org/departments/create"
+  ></app-list-header>
+
+  <app-list-overview
+    icon="layoutDashboard"
+    title="Department overview"
+    subtitle="Review reporting lines, linked branches, and assigned department heads."
+    metricLabel="Visible Departments"
+    [metricValue]="totalDepartmentsCount()"
+    guidanceTitle="Quick notes"
+    [guidanceItems]="guidanceItems"
+  ></app-list-overview>
+
+  <section class="table-shell">
+    <div class="table-shell-header">
+      <div>
+        <h2 class="table-shell-title">Department list</h2>
+        <p class="table-shell-subtitle">
+          Keep the structure easy to scan so administrators can understand reporting
+          lines quickly.
+        </p>
+      </div>
+
+      <div class="records-toolbar">
+        <div class="records-toolbar__chips">
+          <span class="records-toolbar__chip">{{ activeDepartmentsCount() }} active</span>
+          <span class="records-toolbar__chip">{{ headedDepartmentsCount() }} with heads</span>
+          <span class="records-toolbar__chip">{{ linkedBranchesCount() }} linked branches</span>
+        </div>
+
+        @if (loadError()) {
+          <div class="records-feedback records-feedback--danger">
+            {{ loadError() }}
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th class="text-center" style="width: 56px">Sl.</th>
+            <th><button type="button" class="th-btn" (click)="toggleSort('code')"><span>Code</span><span class="sort-icon">{{ sortIcon('code') }}</span></button></th>
+            <th><button type="button" class="th-btn" (click)="toggleSort('name')"><span>Department</span><span class="sort-icon">{{ singleArrowSortIcon('name') }}</span></button></th>
+            <th><button type="button" class="th-btn" (click)="toggleSort('legalEntity')"><span>Legal Entity</span><span class="sort-icon">{{ sortIcon('legalEntity') }}</span></button></th>
+            <th><button type="button" class="th-btn" (click)="toggleSort('branch')"><span>Branch</span><span class="sort-icon">{{ sortIcon('branch') }}</span></button></th>
+            <th><span class="th-btn cursor-default hover:bg-transparent"><span>Parent</span></span></th>
+            <th><button type="button" class="th-btn" (click)="toggleSort('headEmployeeId')"><span>Head</span><span class="sort-icon">{{ sortIcon('headEmployeeId') }}</span></button></th>
+            <th class="text-center"><button type="button" class="th-btn th-btn-center" (click)="toggleSort('status')"><span>Status</span><span class="sort-icon">{{ sortIcon('status') }}</span></button></th>
+            <th><button type="button" class="th-btn" (click)="toggleSort('lastUpdatedAt')"><span>Updated</span><span class="sort-icon">{{ sortIcon('lastUpdatedAt') }}</span></button></th>
+            <th class="text-center">Actions</th>
+          </tr>
+
+          <tr class="filter-row">
+            <th></th>
+            <th><input class="filter-input" type="text" placeholder="Filter code" [value]="filters().code" (input)="setFilter('code', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="text" placeholder="Filter department" [value]="filters().name" (input)="setFilter('name', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="text" placeholder="Filter entity" [value]="filters().legalEntity" (input)="setFilter('legalEntity', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="text" placeholder="Filter branch" [value]="filters().branch" (input)="setFilter('branch', $any($event.target).value)" /></th>
+            <th></th>
+            <th><input class="filter-input" type="text" placeholder="Filter head" [value]="filters().head" (input)="setFilter('head', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="text" placeholder="Status" [value]="filters().status" (input)="setFilter('status', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="date" [value]="filters().updatedAt" (input)="setFilter('updatedAt', $any($event.target).value)" /></th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody [class.data-rows-container]="!isLoading()">
+          @if (isLoading()) {
+            @for (row of skeletonRows; track $index) {
+              <tr class="skeleton-row">
+                <td><div class="skeleton-cell w-8 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 52%"></div></td>
+                <td><div class="skeleton-cell" style="width: 72%"></div></td>
+                <td><div class="skeleton-cell" style="width: 80%"></div></td>
+                <td><div class="skeleton-cell" style="width: 72%"></div></td>
+                <td><div class="skeleton-cell" style="width: 64%"></div></td>
+                <td><div class="skeleton-cell" style="width: 50%"></div></td>
+                <td><div class="skeleton-cell w-24 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 68%"></div></td>
+                <td><div class="skeleton-cell w-16 mx-auto"></div></td>
+              </tr>
+            }
+          }
+
+          @if (!isLoading() && pagedDepartments().length === 0) {
+            <tr>
+              <td colspan="10" class="empty-row-cell">
+                <div class="empty-state-inline">
+                  <div class="empty-icon">
+                    <app-lucide-icon name="network" [size]="28" />
+                  </div>
+                  <h3 class="empty-title">No departments matched the current filters</h3>
+                  <p class="empty-subtitle">
+                    Adjust the filters or create a new department.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (!isLoading()) {
+            @for (department of pagedDepartments(); track trackDepartment($index, department); let i = $index) {
+              <tr class="data-row">
+                <td class="records-serial">{{ serialOf(i) }}</td>
+                <td><a class="order-link" [routerLink]="['/org/departments', department.id, 'edit']"><span>{{ department.code }}</span><app-lucide-icon name="sparkles" [size]="14" /></a></td>
+                <td><div class="records-primary"><span class="records-primary__title">{{ department.name }}</span><span class="records-primary__meta">{{ department.headEmployeeId || 'No department head' }}</span></div></td>
+                <td class="records-muted">{{ legalEntityName(department.legalEntityId) }}</td>
+                <td class="records-muted">{{ branchName(department.branchId) }}</td>
+                <td class="records-muted">{{ parentDepartmentName(department.parentDepartmentId) }}</td>
+                <td class="records-muted">{{ department.headEmployeeId || 'Not assigned' }}</td>
+                <td class="text-center"><span class="status-badge" [class]="statusClass(department.status)">{{ department.status }}</span></td>
+                <td class="records-muted">{{ formatDate(department.lastUpdatedAt || department.createdAt) }}</td>
+                <td><div class="action-group"><a [routerLink]="['/org/departments', department.id, 'edit']" class="action-btn action-amber">Edit</a></div></td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isLoading()) {
+      <app-list-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [rowsPerPage]="rowsPerPage()"
+        [pageInfo]="pageInfo()"
+        (rowsPerPageChange)="setRowsPerPage($event)"
+        (prevPage)="prevPage()"
+        (nextPage)="nextPage()"
+        (goToPage)="goToPage($event)"
+      ></app-list-pagination>
+    }
+  </section>
+</div>

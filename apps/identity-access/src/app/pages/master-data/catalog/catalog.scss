@@ -1,0 +1,134 @@
+@reference "../../../../styles.scss";
+
+:host {
+  @apply block;
+}
+
+.master-catalog {
+  @apply space-y-6;
+}
+
+.catalog-toolbar {
+  @apply flex flex-col gap-5 p-6 lg:flex-row lg:items-end lg:justify-between;
+}
+
+.catalog-toolbar__filters {
+  @apply flex flex-wrap gap-3;
+}
+
+.catalog-filter {
+  @apply inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition;
+  @apply hover:-translate-y-0.5 hover:border-brand-200 hover:text-brand-700 hover:shadow-sm;
+}
+
+.catalog-filter--active {
+  @apply border-brand-200 bg-brand-50 text-brand-700;
+}
+
+.catalog-stack {
+  @apply space-y-6;
+}
+
+.catalog-section {
+  @apply p-6;
+}
+
+.catalog-section__header {
+  @apply flex flex-col gap-4 border-b border-slate-200/80 pb-5 lg:flex-row lg:items-start lg:justify-between;
+}
+
+.catalog-section__eyebrow {
+  @apply inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700;
+}
+
+.catalog-section__header h2 {
+  @apply mt-4 text-2xl font-semibold tracking-tight text-slate-900;
+}
+
+.catalog-section__header p:last-child {
+  @apply mt-2 max-w-3xl text-sm leading-6 text-slate-600;
+}
+
+.catalog-section__summary {
+  @apply flex flex-wrap gap-2;
+}
+
+.catalog-domain-grid {
+  @apply mt-6 grid gap-4 xl:grid-cols-2;
+}
+
+.catalog-domain-card {
+  @apply flex h-full flex-col gap-4 rounded-[28px] border border-slate-200 bg-slate-50/60 p-5;
+}
+
+.catalog-domain-card__header {
+  @apply flex flex-col gap-4;
+}
+
+.catalog-domain-card__title {
+  @apply flex items-start gap-4;
+}
+
+.catalog-domain-card__icon {
+  @apply inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-white/80 bg-white text-brand-700 shadow-sm;
+}
+
+.catalog-domain-card__title h3 {
+  @apply text-lg font-semibold tracking-tight text-slate-900;
+}
+
+.catalog-domain-card__title p {
+  @apply mt-2 text-sm leading-6 text-slate-600;
+}
+
+.catalog-domain-card__summary {
+  @apply flex flex-wrap gap-2;
+}
+
+.catalog-domain-card__meta {
+  @apply grid gap-4 rounded-[22px] border border-white/80 bg-white/90 p-4 md:grid-cols-2;
+}
+
+.catalog-meta-label {
+  @apply text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500;
+}
+
+.catalog-domain-card__meta p {
+  @apply mt-2 break-all text-sm font-medium text-slate-800;
+}
+
+.catalog-domain-card__tags {
+  @apply flex flex-wrap gap-2;
+}
+
+.catalog-empty-state {
+  @apply flex items-center gap-3 rounded-[22px] border border-dashed border-slate-300 bg-white/80 px-4 py-4 text-sm text-slate-600;
+}
+
+.catalog-table-scroll {
+  @apply overflow-x-auto rounded-[22px] border border-slate-200 bg-white;
+}
+
+.catalog-table {
+  @apply w-full min-w-[420px] border-collapse text-left text-sm text-slate-700;
+}
+
+.catalog-table thead th {
+  @apply border-b border-slate-200 bg-slate-100/80 px-4 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600;
+}
+
+.catalog-table tbody td {
+  @apply border-b border-slate-100 px-4 py-3 align-middle text-sm;
+}
+
+.catalog-table tbody tr:last-child td {
+  @apply border-b-0;
+}
+
+.catalog-table__primary {
+  @apply font-semibold text-slate-900;
+}
+
+.catalog-domain-card__footer {
+  @apply mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 text-xs font-medium text-slate-500;
+}

@@ -1,203 +1,191 @@
-<div class="min-h-screen bg-slate-100 text-slate-900">
-  <!-- Backdrop -->
+<div class="shell">
   <div
-    id="sidebarBackdrop"
-    class="fixed inset-0 bg-slate-950/50 backdrop-blur-[2px] z-30 lg:hidden"
-    [class.hidden]="!isMobileOpen()"
+    class="shell__backdrop"
+    [class.shell__backdrop--hidden]="!isMobileOpen()"
     (click)="closeMobileSidebar()"
   ></div>
 
-  <div
-    class="grid min-h-screen app-content"
+  <aside
+    class="shell__sidebar"
+    [class.shell__sidebar--hidden]="!isDesktop() && !isMobileOpen()"
+    [class.shell__sidebar--compact]="isSidebarCompact"
   >
-    <!-- Sidebar -->
-    <aside
-      id="sidebar"
-      class="fixed top-0 left-0 z-40 h-screen bg-slate-950 text-slate-100 shadow-[4px_0_24px_-4px_rgba(15,23,42,0.25)] border-r border-slate-800/80 transition-all duration-300 ease-out flex flex-col"
-      [class.-translate-x-full]="!isDesktop() && !isMobileOpen()"
-      [class.translate-x-0]="isDesktop() || isMobileOpen()"
-      [class.w-72]="!isCollapsed()"
-      [class.w-24]="isCollapsed()"
-      [class.sidebar-collapsed]="isDesktop() && isCollapsed()"
-    >
-      <!-- Brand -->
+    <div class="shell__brand">
+      <button type="button" class="btn-sidebar" (click)="toggleSidebar()">
+        <app-lucide-icon name="panelLeftClose" [size]="18" />
+      </button>
+
       <div
-        class="h-[4.5rem] px-5 flex items-center border-b border-slate-800/90 bg-slate-950"
+        class="shell__brand-copy"
+        [class.shell__brand-copy--collapsed]="isSidebarCompact"
       >
-        <div
-          class="brand-wrapper flex items-center gap-4 w-full"
-          [class.justify-center]="isDesktop() && isCollapsed()"
+        <p class="shell__eyebrow">Hishab Nikash</p>
+        <h1>Hishab Nikash ERP</h1>
+        <p class="shell__brand-note">Administration workspace</p>
+      </div>
+    </div>
+
+    <section
+      class="shell__context surface-card"
+      [class.shell__context--collapsed]="isSidebarCompact"
+    >
+      <p class="section-kicker">Current Workspace</p>
+      <h2 class="shell__context-title">
+        {{ currentUser()?.tenantId || 'ERP-DEFAULT' }}
+      </h2>
+      <p class="shell__context-copy">
+        Signed in as {{ currentUser()?.displayName || 'Guest User' }}.
+      </p>
+    </section>
+
+    <div class="shell__nav">
+      @for (group of navGroups; track group.id) {
+        <section
+          class="shell__nav-group"
+          [class.shell__nav-group--expanded]="isGroupExpanded(group.id)"
+          [class.shell__nav-group--active]="isGroupActive(group)"
         >
           <button
-            id="sidebarToggle"
             type="button"
-            class="btn-sidebar"
-            (click)="toggleSidebar()"
+            class="shell__menu-trigger"
+            [class.shell__menu-trigger--active]="isGroupActive(group)"
+            [class.shell__menu-trigger--compact]="isSidebarCompact"
+            (click)="toggleGroup(group.id)"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5 transition-transform duration-300"
-              [class.rotate-180]="isCollapsed()"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
+            <span class="shell__menu-trigger-icon">
+              <app-lucide-icon [name]="group.icon" [size]="18" />
+            </span>
+
+            <span
+              class="shell__menu-trigger-copy"
+              [class.shell__menu-trigger-copy--collapsed]="isSidebarCompact"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
+              <span class="shell__menu-trigger-label">{{ group.label }}</span>
+              <span class="shell__menu-trigger-note">{{ group.note }}</span>
+            </span>
+
+            <span
+              class="shell__menu-chevron"
+              [class.shell__menu-chevron--open]="isGroupExpanded(group.id)"
+              [class.shell__menu-chevron--collapsed]="isSidebarCompact"
+            >
+              <app-lucide-icon name="chevronDown" [size]="16" />
+            </span>
           </button>
 
           <div
-            id="brandText"
-            class="min-w-0"
-            [class.hidden]="isDesktop() && isCollapsed()"
+            class="shell__submenu"
+            [class.shell__submenu--open]="isGroupExpanded(group.id) && !isSidebarCompact"
           >
-            <h2
-              class="text-base font-bold tracking-wide text-white leading-tight"
-            >
-              Hishab Nikash
-            </h2>
-            <p class="brand-subtitle text-xs text-slate-400 mt-0.5">
-              ERP System
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Search / quick area -->
-      <div
-        class="px-4 pt-4 pb-2 search-box"
-        [class.hidden]="isDesktop() && isCollapsed()"
-      >
-        <div
-          class="relative rounded-xl border border-slate-700/80 bg-slate-900/50 px-3 py-2 flex items-center gap-2 focus-within:border-blue-500 focus-within:bg-slate-900 focus-within:ring-2 focus-within:ring-blue-500/30 transition-all duration-200"
-        >
-          <app-lucide-icon name="search" [size]="16" class="text-slate-500" />
-          <input
-            type="text"
-            placeholder="Search Navigation..."
-            class="w-full bg-transparent border-none p-0 text-sm text-slate-200 placeholder:text-slate-500 focus:ring-0 outline-none"
-          />
-        </div>
-      </div>
-
-      <!-- Nav -->
-      <nav class="flex-1 overflow-y-auto sidebar-scroll px-4 py-3 space-y-4">
-        @for (item of navItems; track item.path) {
-          <a
-            [routerLink]="[item.path]"
-            routerLinkActive="bg-slate-800/90 text-white border border-slate-600/80 shadow-sm"
-            [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
-            class="nav-item group relative flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-slate-400 hover:border-slate-700 hover:bg-slate-800/60 hover:text-white transition-all duration-200"
-            [class.justify-center]="isDesktop() && isCollapsed()"
-          >
-            <span
-              class="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              routerLinkActive="opacity-100"
-            ></span>
-            <span
-              class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 border border-slate-700/80 text-slate-300 group-hover:border-slate-600 group-hover:text-white transition-colors duration-200"
-              routerLinkActive="border-blue-500/60 bg-slate-800 text-blue-400"
-            >
-              <app-lucide-icon [name]="item.icon" [size]="18" />
-            </span>
-            <span
-              class="sidebar-label flex-1 font-medium"
-              [class.hidden]="isDesktop() && isCollapsed()"
-            >
-              {{ item.label }}
-            </span>
-          </a>
-        }
-      </nav>
-
-      <!-- Sidebar Footer -->
-      <div class="mt-auto border-t border-slate-800/90 p-4">
-        <div
-          class="group flex items-center gap-3 rounded-xl border border-transparent p-2 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800/50"
-          [class.justify-center]="isCollapsed()"
-        >
-          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-blue-600/30 bg-blue-600 text-sm font-bold text-white shadow-sm">
-            {{ currentUser()?.displayName?.charAt(0) || 'U' }}
-          </div>
-          
-          <div class="footer-content flex flex-1 flex-col overflow-hidden" [class.hidden]="isCollapsed()">
-            <span class="truncate text-sm font-semibold text-slate-200">{{ currentUser()?.displayName || 'Guest User' }}</span>
-            <span class="truncate text-xs text-slate-500">{{ currentUser()?.email || 'Not logged in' }}</span>
-          </div>
-
-          <button
-            type="button"
-            (click)="logout()"
-            class="footer-content btn-footer-icon"
-            [class.hidden]="isCollapsed()"
-            title="Sign Out"
-          >
-            <app-lucide-icon name="logOut" [size]="18" />
-          </button>
-        </div>
-      </div>
-    </aside>
-
-    <div 
-      class="min-w-0 flex flex-col transition-all duration-300 ease-in-out"
-      [class.lg:ml-72]="isDesktop() && !isCollapsed()"
-      [class.lg:ml-24]="isDesktop() && isCollapsed()"
-    >
-      <!-- Top header -->
-      <header class="app-header">
-        <div class="app-header-inner">
-          <div class="app-header-left">
-            <div class="min-w-0">
-              <div class="flex items-center gap-2">
-                <h1 class="app-header-title">{{ pageTitle }}</h1>
-                @if (currentUser()?.tenantId) {
-                  <span class="app-tenant-pill">
-                    <app-lucide-icon name="building2" [size]="14" />
-                    <span class="truncate">{{ currentUser()?.tenantId }}</span>
+            <nav class="shell__nav-list">
+              @for (item of group.items; track item.path) {
+                <a
+                  [routerLink]="[item.path]"
+                  routerLinkActive="shell__nav-link--active"
+                  [routerLinkActiveOptions]="linkActiveOptions(item)"
+                  class="shell__nav-link"
+                  (click)="onMenuItemClick(group.id)"
+                >
+                  <span class="shell__nav-icon">
+                    <app-lucide-icon [name]="item.icon" [size]="18" />
                   </span>
-                }
-              </div>
-              <p class="app-header-subtitle">
-                Identity &amp; Access Console
-              </p>
-            </div>
+
+                  <span class="shell__nav-copy">
+                    <span class="shell__nav-title">{{ item.label }}</span>
+                    <span class="shell__nav-note">{{ item.note }}</span>
+                  </span>
+                </a>
+              }
+            </nav>
           </div>
-
-          <div class="app-header-right">
-            <div class="app-header-search">
-              <app-lucide-icon name="search" [size]="16" class="text-slate-500" />
-              <input
-                type="text"
-                placeholder="Search users, roles, policies…"
-                class="app-header-search-input"
-              />
-            </div>
-
-            <button type="button" class="app-header-icon-btn" title="Notifications" aria-label="Notifications">
-              <app-lucide-icon name="bell" [size]="18" />
-            </button>
-
-            <div class="app-header-user">
-              <div class="app-header-avatar" aria-hidden="true">
-                {{ currentUser()?.displayName?.charAt(0) || 'U' }}
-              </div>
-              <div class="hidden sm:block min-w-0">
-                <div class="app-header-user-name">{{ currentUser()?.displayName || 'Guest User' }}</div>
-                <div class="app-header-user-email">{{ currentUser()?.email || 'Not logged in' }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main class="w-full h-full px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
-        <router-outlet />
-      </main>
+        </section>
+      }
     </div>
+
+    <section
+      class="shell__modules"
+      [class.shell__modules--collapsed]="isSidebarCompact"
+    >
+      <p class="shell__nav-label" [class.shell__nav-label--collapsed]="isSidebarCompact">
+        Workspace Areas
+      </p>
+      <div class="shell__module-list">
+        @for (module of workspaceModules; track module.name) {
+          <div class="shell__module-pill">
+            <span>{{ module.name }}</span>
+            <span>{{ module.description }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <div class="shell__footer">
+      <div class="shell__user">
+        <div class="shell__avatar">
+          {{ currentUser()?.displayName?.charAt(0) || 'U' }}
+        </div>
+
+        <div
+          class="shell__user-copy"
+          [class.shell__user-copy--collapsed]="isSidebarCompact"
+        >
+          <p>{{ currentUser()?.displayName || 'Guest User' }}</p>
+          <span>{{ currentUser()?.email || 'Not logged in' }}</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn-sidebar-wide"
+        [class.justify-center]="isSidebarCompact"
+        (click)="logout()"
+      >
+        <app-lucide-icon name="logOut" [size]="18" />
+        <span
+          class="shell__button-text"
+          [class.shell__button-text--collapsed]="isSidebarCompact"
+        >
+          Sign out
+        </span>
+      </button>
+    </div>
+  </aside>
+
+  <div
+    class="shell__main"
+    [class.shell__main--compact]="isSidebarCompact"
+  >
+    <header class="shell__header">
+      <div class="shell__header-copy">
+        <p class="section-kicker">{{ pageSection }}</p>
+        <h2>{{ pageTitle }}</h2>
+        <p>{{ pageSubtitle }}</p>
+      </div>
+
+      <div class="shell__header-meta">
+        <div class="shell__header-pill">
+          <app-lucide-icon name="calendarDays" [size]="15" />
+          <span>{{ todayLabel }}</span>
+        </div>
+
+        <div class="shell__header-pill shell__header-pill--strong">
+          <app-lucide-icon name="building2" [size]="15" />
+          <span>{{ currentUser()?.tenantId || 'ERP-DEFAULT' }}</span>
+        </div>
+
+        <button
+          type="button"
+          class="shell__header-pill shell__header-pill--action shell__header-pill--danger"
+          (click)="logout()"
+        >
+          <app-lucide-icon name="logOut" [size]="15" />
+          <span>Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="shell__content">
+      <router-outlet />
+    </main>
   </div>
 </div>

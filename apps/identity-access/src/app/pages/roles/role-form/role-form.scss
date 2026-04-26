@@ -1,77 +1,117 @@
-@reference "../../../../../../shell/src/styles.scss";
+@reference "../../../../styles.scss";
 
 :host {
-  display: block;
+  @apply block;
 }
 
-.role-form-page {
-  @apply min-h-screen bg-slate-100 p-6;
+.form-page {
+  @apply space-y-6;
+}
+
+.form-stack {
+  @apply space-y-6;
+}
+
+.loading-state {
+  @apply inline-flex items-center gap-3 rounded-[30px] p-6 text-sm font-medium text-brand-700;
+}
+
+.loading-state--inline {
+  @apply mt-5 rounded-[24px] border border-brand-200 bg-brand-50 px-4 py-3;
 }
 
 .form-layout {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 1.5rem;
-  align-items: start;
-  margin-bottom: 1.5rem;
+  @apply grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_420px];
 }
 
+.form-main,
 .form-sidebar {
-  position: sticky;
-  top: 1.5rem;
+  @apply space-y-6;
 }
 
-.form-section {
-  @apply rounded-[24px] border border-slate-200 bg-white p-8 shadow-sm;
+.form-section-card {
+  @apply p-6;
 }
 
-.form-section-title {
-  @apply mb-6 flex items-center gap-2.5 text-base font-black uppercase tracking-widest text-slate-900;
-
-  app-lucide-icon {
-    @apply text-indigo-500;
-  }
+.form-section-head {
+  @apply flex items-start justify-between gap-4;
 }
 
 .form-grid {
-  @apply grid grid-cols-1 gap-5 md:grid-cols-2;
+  @apply mt-6 grid gap-5 md:grid-cols-2;
 }
 
-.form-field {
-  @apply flex flex-col gap-1.5;
-}
-
-.field-label {
-  @apply text-[11px] font-black uppercase tracking-widest text-slate-400;
-}
-
-.field-helper {
-  @apply text-[11px] font-semibold text-slate-400;
+.form-grid__full {
+  @apply md:col-span-2;
 }
 
 .required-star {
   @apply text-rose-500;
 }
 
-.field-error {
-  @apply text-[11px] font-semibold text-rose-500;
+.form-helper-row {
+  @apply flex items-center justify-between gap-3;
 }
 
-.form-input {
-  @apply w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3.5 text-sm font-semibold text-slate-900 outline-none transition;
-  @apply focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100;
+.guidance-grid {
+  @apply mt-6 grid gap-4 md:grid-cols-3;
 }
 
-.form-textarea {
-  @apply min-h-32 resize-y;
+.guidance-card {
+  @apply rounded-[24px] border border-slate-200/80 bg-sand-50/80 p-5;
+}
+
+.guidance-card__label {
+  @apply text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500;
+}
+
+.guidance-card strong {
+  @apply mt-4 block text-3xl font-semibold tracking-tight text-slate-900;
+}
+
+.guidance-card span {
+  @apply mt-2 block text-sm leading-6 text-slate-600;
 }
 
 .permission-entry {
-  @apply space-y-3;
+  @apply flex flex-col gap-3 md:flex-row md:items-center;
 }
 
-.permission-input-row {
-  @apply flex items-center gap-3;
+.permission-entry__input {
+  @apply flex-1;
+}
+
+.catalog-suggestions {
+  @apply mt-6 rounded-[24px] border border-slate-200/80 bg-slate-50/80 p-4;
+}
+
+.catalog-suggestions__header {
+  @apply flex items-center justify-between gap-3;
+}
+
+.catalog-suggestions__header span {
+  @apply text-xs font-semibold text-slate-500;
+}
+
+.catalog-suggestions__list {
+  @apply mt-4 flex flex-wrap gap-2;
+}
+
+.catalog-chip {
+  @apply flex flex-col rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left transition;
+  @apply hover:-translate-y-0.5 hover:border-brand-300 hover:bg-brand-50/50;
+}
+
+.catalog-chip span {
+  @apply text-sm font-semibold text-slate-900;
+}
+
+.catalog-chip small {
+  @apply mt-1 text-xs uppercase tracking-[0.16em] text-slate-500;
+}
+
+.section-note {
+  @apply mt-5 rounded-[24px] border border-slate-200 bg-slate-50/80 px-5 py-4 text-sm leading-6 text-slate-600;
 }
 
 .permission-list {
@@ -79,61 +119,19 @@
 }
 
 .permission-chip {
-  @apply inline-flex items-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700;
+  @apply inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-medium text-brand-700;
 }
 
-.permission-chip-remove {
-  @apply inline-flex h-6 w-6 items-center justify-center rounded-full text-indigo-500 transition;
-  @apply hover:bg-indigo-100 hover:text-indigo-700;
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 focus-visible:ring-offset-1;
+.permission-chip__remove {
+  @apply inline-flex h-6 w-6 items-center justify-center rounded-full text-brand-700 transition;
+  @apply hover:bg-brand-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300;
 }
 
-.permissions-empty {
-  @apply mt-5 rounded-[24px] border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center;
+.form-actions {
+  @apply flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between;
 }
 
-.permissions-summary {
-  @apply mt-6 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3;
-}
-
-.summary-label {
-  @apply text-[11px] font-black uppercase tracking-widest text-indigo-400;
-}
-
-.summary-value {
-  @apply mt-2 text-sm font-bold text-indigo-700;
-}
-
-.guidance-grid {
-  @apply grid gap-4 md:grid-cols-2;
-}
-
-.guidance-card {
-  @apply rounded-3xl border border-slate-200 bg-slate-50 p-5;
-}
-
-.guidance-label {
-  @apply mb-2 text-xs font-black uppercase tracking-[0.2em] text-slate-400;
-}
-
-.guidance-text {
-  @apply text-sm font-medium leading-6 text-slate-700;
-}
-
-.feedback-success {
-  @apply flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700;
-}
-
-.feedback-error {
-  @apply flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-600;
-}
-
-@media (max-width: 1023px) {
-  .form-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .form-sidebar {
-    position: static;
-  }
+.form-actions__buttons,
+.form-actions__feedback {
+  @apply flex flex-wrap items-center gap-3;
 }

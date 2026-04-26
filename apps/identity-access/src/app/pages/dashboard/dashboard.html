@@ -1,125 +1,180 @@
-<div class="dashboard-page">
-  <section class="dash-hero">
-    <div class="dash-hero-top">
-      <div class="dash-date-chip">
-        <lucide-icon [img]="CalendarDays" class="dash-chip-icon"></lucide-icon>
-        <span>{{ todayLabel }}</span>
+<div class="dashboard-page page-shell">
+  <section class="dashboard-hero surface-card">
+    <div class="dashboard-hero__top">
+      <div>
+        <div class="dashboard-hero__eyebrow">
+          <app-lucide-icon name="calendarDays" [size]="15" />
+          <span>{{ todayLabel }}</span>
+        </div>
+
+        <h1>{{ greeting }}, {{ currentUser()?.displayName || 'operator' }}</h1>
+        <p>
+          Manage users, roles, permissions, and organization access from one workspace.
+        </p>
       </div>
-      <div class="dash-hero-actions">
-        <a class="dash-btn dash-btn--primary" [routerLink]="['/iam/users/create']">
-          <lucide-icon [img]="Users" class="dash-btn-icon"></lucide-icon>
-          Create user
+
+      <div class="dashboard-hero__actions">
+        <a class="btn btn-primary" [routerLink]="['/iam/users/create']">
+          <app-lucide-icon name="userPlus" [size]="16" />
+          <span>Create user</span>
         </a>
-        <a class="dash-btn dash-btn--ghost" [routerLink]="['/iam/roles/create']">
-          <lucide-icon [img]="ShieldCheck" class="dash-btn-icon"></lucide-icon>
-          Create role
+
+        <a class="btn btn-secondary" [routerLink]="['/iam/roles/create']">
+          <app-lucide-icon name="shieldPlus" [size]="16" />
+          <span>Create role</span>
+        </a>
+
+        <a class="btn btn-secondary" [routerLink]="['/iam/access-catalog']">
+          <app-lucide-icon name="libraryBig" [size]="16" />
+          <span>Open access directory</span>
         </a>
       </div>
     </div>
 
-    <div class="dash-hero-main">
-      <h1>{{ greeting }} — Identity &amp; Access</h1>
-      <p>
-        Monitor users, roles, policies, sessions, and security posture for your tenant.
-      </p>
-      <div class="dash-live-pill">
-        <span class="dash-live-dot" aria-hidden="true"></span>
-        Live IAM overview
+    @if (loadError()) {
+      <div class="inline-note inline-note--danger">
+        <app-lucide-icon name="alertCircle" [size]="16" />
+        <span>{{ loadError() }}</span>
       </div>
-    </div>
+    }
 
-    <div class="dash-ops-grid">
-      @for (item of posture; track item.label) {
-        <article class="dash-op-card" [class]="'dash-op-card dash-op-card--' + item.tone">
-          <p>{{ item.label }}</p>
-          <strong>{{ item.value }}</strong>
-          <span class="dash-op-note">{{ item.note }}</span>
+    <div class="dashboard-hero__summary">
+      @for (card of summaryCards(); track card.label) {
+        <article class="metric-tile">
+          <div class="dashboard-summary__head">
+            <p class="metric-tile__eyebrow">{{ card.label }}</p>
+            <div class="dashboard-summary__icon">
+              <app-lucide-icon [name]="card.icon" [size]="18" />
+            </div>
+          </div>
+          <p class="metric-tile__value">{{ card.value }}</p>
+          <p class="metric-tile__note">{{ card.note }}</p>
         </article>
       }
     </div>
   </section>
 
-  <section class="dash-stats-grid">
-    @for (stat of kpiCards; track stat.title) {
-      <article class="dash-stat-card">
-        <div class="dash-stat-head">
-          <span>{{ stat.title }}</span>
-          <div class="dash-stat-icon">
-            <lucide-icon [img]="stat.icon" class="dash-stat-icon-svg"></lucide-icon>
-          </div>
-        </div>
-        <strong class="dash-stat-value">{{ stat.value }}</strong>
-        <p class="dash-stat-note">{{ stat.note }}</p>
-        <p class="dash-stat-trend">
-          <lucide-icon [img]="ArrowUpRight" class="dash-trend-icon"></lucide-icon>
-          {{ stat.trend }}
-        </p>
-      </article>
-    }
-  </section>
-
-  <section class="dash-content-grid">
-    <article class="dash-panel">
-      <header class="dash-panel-head">
-        <div class="dash-panel-icon">
-          <lucide-icon [img]="Zap" class="dash-panel-icon-svg"></lucide-icon>
-        </div>
+  <section class="dashboard-layout">
+    <article class="dashboard-panel surface-card">
+      <div class="dashboard-panel__header">
         <div>
-          <h2>Quick actions</h2>
-          <p>Shortcuts for common IAM operations</p>
+          <p class="section-kicker">System Areas</p>
+          <h2 class="section-title">What you can manage here</h2>
         </div>
-      </header>
-      <div class="dash-actions-grid">
-        @for (qa of quickActions; track qa.label) {
-          <button type="button" class="dash-action-btn">
-            <lucide-icon [img]="qa.icon" class="dash-action-icon"></lucide-icon>
-            <span>{{ qa.label }}</span>
-          </button>
+      </div>
+
+      <div class="dashboard-module-list">
+        @for (module of moduleCards; track module.title) {
+          <article class="dashboard-module">
+            <div class="dashboard-module__icon">
+              <app-lucide-icon [name]="module.icon" [size]="18" />
+            </div>
+
+            <div class="dashboard-module__copy">
+              <h3>{{ module.title }}</h3>
+              <p>{{ module.detail }}</p>
+              <span>{{ module.caption }}</span>
+            </div>
+          </article>
         }
       </div>
     </article>
 
-    <article class="dash-panel">
-      <header class="dash-panel-head">
-        <div class="dash-panel-icon dash-panel-icon--subtle">
-          <lucide-icon [img]="List" class="dash-panel-icon-svg"></lucide-icon>
-        </div>
+    <article class="dashboard-panel surface-card">
+      <div class="dashboard-panel__header">
         <div>
-          <h2>Recent audit events</h2>
-          <p>Administrative and authentication activity</p>
+          <p class="section-kicker">System Modules</p>
+          <h2 class="section-title">Permission coverage</h2>
         </div>
-      </header>
-      <div class="dash-table-wrap">
-        <table class="dash-table">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>Actor</th>
-              <th>Action</th>
-              <th>Target</th>
-              <th>Result</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (e of auditEvents; track e.time + e.actor + e.action) {
-              <tr>
-                <td class="dash-dim">{{ e.time }}</td>
-                <td class="dash-strong">{{ e.actor }}</td>
-                <td>{{ e.action }}</td>
-                <td class="dash-dim">{{ e.target }}</td>
-                <td>
-                  <span
-                    class="dash-pill"
-                    [class.dash-pill--green]="e.result === 'Success'"
-                    [class.dash-pill--amber]="e.result !== 'Success'"
-                  >
-                    {{ e.result }}
-                  </span>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+      </div>
+
+      @if (isLoading()) {
+        <div class="dashboard-state">
+          <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+          <span>Loading permission coverage...</span>
+        </div>
+      } @else {
+        <div class="dashboard-service-list">
+          @for (item of serviceCoverage(); track item[0]) {
+            <div class="dashboard-service-row">
+              <div>
+                <p>{{ item[0] }}</p>
+                <span>{{ item[1] }} permission(s)</span>
+              </div>
+              <app-lucide-icon name="arrowUpRight" [size]="16" />
+            </div>
+          }
+        </div>
+      }
+    </article>
+  </section>
+
+  <section class="dashboard-layout dashboard-layout--wide">
+    <article class="dashboard-panel surface-card">
+      <div class="dashboard-panel__header">
+        <div>
+          <p class="section-kicker">Roles</p>
+          <h2 class="section-title">Roles with the broadest access</h2>
+        </div>
+      </div>
+
+      <div class="dashboard-role-list">
+        @for (role of topRoles(); track role.id) {
+          <div class="dashboard-role">
+            <div>
+              <h3>{{ role.name }}</h3>
+              <p>{{ role.code }}</p>
+            </div>
+            <span class="status-chip status-chip--accent">
+              {{ role.permissions.length }} permission(s)
+            </span>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="dashboard-panel surface-card">
+      <div class="dashboard-panel__header">
+        <div>
+          <p class="section-kicker">Access Areas</p>
+          <h2 class="section-title">Highlighted access areas</h2>
+        </div>
+      </div>
+
+      <div class="dashboard-resource-list">
+        @for (resource of resourceHighlights(); track resource.id) {
+          <div class="dashboard-resource">
+            <div>
+              <h3>{{ resource.name }}</h3>
+              <p>{{ resource.fullCode }}</p>
+            </div>
+            <div class="dashboard-resource__meta">
+              <span class="status-chip status-chip--neutral">{{ resource.serviceCode }}</span>
+              <span class="status-chip status-chip--soft">{{ resource.type }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </article>
+
+    <article class="dashboard-panel surface-card">
+      <div class="dashboard-panel__header">
+        <div>
+          <p class="section-kicker">Tenant Distribution</p>
+          <h2 class="section-title">Users by tenant</h2>
+        </div>
+      </div>
+
+      <div class="dashboard-tenant-list">
+        @for (tenant of topTenants(); track tenant[0]) {
+          <div class="dashboard-tenant">
+            <div>
+              <h3>{{ tenant[0] }}</h3>
+              <p>{{ tenant[1] }} user(s)</p>
+            </div>
+            <app-lucide-icon name="building2" [size]="16" />
+          </div>
+        }
       </div>
     </article>
   </section>

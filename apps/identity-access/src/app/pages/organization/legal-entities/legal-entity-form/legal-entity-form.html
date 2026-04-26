@@ -1,0 +1,477 @@
+<div class="form-page page-shell">
+  @if (isEditMode()) {
+    <app-form-header
+      icon="pencil"
+      badge="Organization Setup"
+      title="Edit Legal Entity"
+      subtitle="Update registration, finance, and contact details for this legal entity."
+      actionText="Back to Entities"
+      actionRoute="/org/legal-entities"
+    ></app-form-header>
+  } @else {
+    <app-form-header
+      icon="building2"
+      badge="Organization Setup"
+      title="Create Legal Entity"
+      subtitle="Add the top-level organization record before configuring business units and branches."
+      actionText="Back to Entities"
+      actionRoute="/org/legal-entities"
+    ></app-form-header>
+  }
+
+  @if (isLoadingEntity()) {
+    <div class="loading-state surface-card">
+      <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+      <span>Loading legal entity data...</span>
+    </div>
+  } @else {
+    <form
+      #entityForm="ngForm"
+      (ngSubmit)="saveEntity(entityForm)"
+      novalidate
+      class="form-stack"
+    >
+      <div class="form-layout">
+        <div class="form-main">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Identity</p>
+                <h2 class="section-title">Core details</h2>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field-shell">
+                <span class="field-label">Code <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="hash" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="code"
+                    [(ngModel)]="form.code"
+                    required
+                    maxlength="40"
+                    [readonly]="isEditMode()"
+                    placeholder="e.g. HN-BD"
+                    #codeCtrl="ngModel"
+                  />
+                </div>
+                @if (codeCtrl.invalid && codeCtrl.touched) {
+                  <span class="field-error">Code is required.</span>
+                }
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Legal name <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="badgeInfo" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="legalName"
+                    [(ngModel)]="form.legalName"
+                    required
+                    maxlength="160"
+                    placeholder="e.g. Hishab Nikash Ltd."
+                    #legalNameCtrl="ngModel"
+                  />
+                </div>
+                @if (legalNameCtrl.invalid && legalNameCtrl.touched) {
+                  <span class="field-error">Legal name is required.</span>
+                }
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Trade name</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="badgeCheck" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="tradeName"
+                    [(ngModel)]="form.tradeName"
+                    maxlength="160"
+                    placeholder="e.g. Hishab Nikash ERP"
+                  />
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">
+                  Registration number <span class="required-star">*</span>
+                </span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="fileBadge" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="registrationNumber"
+                    [(ngModel)]="form.registrationNumber"
+                    required
+                    maxlength="80"
+                    placeholder="Official registration number"
+                    #registrationCtrl="ngModel"
+                  />
+                </div>
+                @if (registrationCtrl.invalid && registrationCtrl.touched) {
+                  <span class="field-error">Registration number is required.</span>
+                }
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Finance</p>
+                <h2 class="section-title">Tax and fiscal setup</h2>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field-shell">
+                <span class="field-label">Tax number</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="receiptText" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="taxNumber"
+                    [(ngModel)]="form.taxNumber"
+                    maxlength="80"
+                    placeholder="Tax identification number"
+                  />
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Country code <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="flag" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="countryCode"
+                    [(ngModel)]="form.countryCode"
+                    required
+                    maxlength="10"
+                    placeholder="e.g. BD"
+                    #countryCtrl="ngModel"
+                  />
+                </div>
+                @if (countryCtrl.invalid && countryCtrl.touched) {
+                  <span class="field-error">Country code is required.</span>
+                }
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Base currency <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="coins" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="baseCurrencyCode"
+                    [(ngModel)]="form.baseCurrencyCode"
+                    required
+                    maxlength="10"
+                    placeholder="e.g. BDT"
+                    #currencyCtrl="ngModel"
+                  />
+                </div>
+                @if (currencyCtrl.invalid && currencyCtrl.touched) {
+                  <span class="field-error">Base currency is required.</span>
+                }
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Fiscal year start <span class="required-star">*</span></span>
+                <div class="field-shell__select">
+                  <select
+                    class="field-select"
+                    name="fiscalYearStartMonth"
+                    [(ngModel)]="form.fiscalYearStartMonth"
+                    required
+                  >
+                    @for (month of fiscalMonthOptions; track month.value) {
+                      <option [ngValue]="month.value">{{ month.label }}</option>
+                    }
+                  </select>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Contact</p>
+                <h2 class="section-title">Address and contact details</h2>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field-shell form-grid__full">
+                <span class="field-label">Address line 1</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="mapPinned" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="addressLine1"
+                    [(ngModel)]="form.addressLine1"
+                    maxlength="200"
+                    placeholder="Primary street address"
+                  />
+                </div>
+              </label>
+
+              <label class="field-shell form-grid__full">
+                <span class="field-label">Address line 2</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="map" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="addressLine2"
+                    [(ngModel)]="form.addressLine2"
+                    maxlength="200"
+                    placeholder="Apartment, floor, or locality"
+                  />
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">City</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="building" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="city"
+                    [(ngModel)]="form.city"
+                    maxlength="100"
+                    placeholder="City"
+                  />
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">State / division</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="mapPlus" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="state"
+                    [(ngModel)]="form.state"
+                    maxlength="100"
+                    placeholder="State or division"
+                  />
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Postal code</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="mailbox" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="postalCode"
+                    [(ngModel)]="form.postalCode"
+                    maxlength="40"
+                    placeholder="Postal code"
+                  />
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Phone</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="phone" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="phone"
+                    [(ngModel)]="form.phone"
+                    maxlength="40"
+                    placeholder="+880..."
+                  />
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Email</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="mail" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="email"
+                    class="field-input"
+                    name="email"
+                    [(ngModel)]="form.email"
+                    maxlength="120"
+                    placeholder="info@example.com"
+                  />
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Website</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="globe" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="website"
+                    [(ngModel)]="form.website"
+                    maxlength="160"
+                    placeholder="https://example.com"
+                  />
+                </div>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <aside class="form-sidebar">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Record summary</p>
+                <h2 class="section-title">Entity snapshot</h2>
+              </div>
+            </div>
+
+            <div class="summary-list">
+              <article class="summary-card">
+                <p class="summary-card__eyebrow">Code</p>
+                <p class="summary-card__value">
+                  {{ form.code || 'Will be generated from your entry' }}
+                </p>
+                <p class="summary-card__meta">
+                  @if (isEditMode()) {
+                    Code stays read-only after creation.
+                  } @else {
+                    Use a short, memorable code for lookups.
+                  }
+                </p>
+              </article>
+
+              <article class="summary-card">
+                <p class="summary-card__eyebrow">Finance base</p>
+                <p class="summary-card__value">
+                  {{ form.baseCurrencyCode || 'Currency not set' }}
+                </p>
+                <p class="summary-card__meta">
+                  Fiscal start:
+                  {{
+                    fiscalMonthOptions[form.fiscalYearStartMonth - 1]?.label || 'Not set'
+                  }}
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Lifecycle</p>
+                <h2 class="section-title">Record state</h2>
+              </div>
+            </div>
+
+            @if (isEditMode()) {
+              <div class="summary-grid summary-grid--two">
+                <label class="field-shell">
+                  <span class="field-label">Status</span>
+                  <div class="field-shell__select">
+                    <select class="field-select" name="status" [(ngModel)]="form.status">
+                      <option value="ACTIVE">ACTIVE</option>
+                      <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                  </div>
+                </label>
+              </div>
+            } @else {
+              <div class="section-note">
+                New legal entities are created as active records and can be
+                adjusted later from the list or edit page.
+              </div>
+            }
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Tips</p>
+                <h2 class="section-title">Before you save</h2>
+              </div>
+            </div>
+
+            <div class="helper-grid">
+              <article class="helper-card">
+                <h3>Keep finance identifiers exact</h3>
+                <p>Currency, registration, and tax details flow into downstream setup.</p>
+              </article>
+
+              <article class="helper-card">
+                <h3>Use a stable code</h3>
+                <p>The code becomes the quick reference used across organization screens.</p>
+              </article>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <div class="form-actions">
+        <div class="form-actions__buttons">
+          @if (isEditMode()) {
+            <button type="submit" class="btn btn-warning" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Updating...</span>
+              } @else {
+                <app-lucide-icon name="save" [size]="16" />
+                <span>Update Entity</span>
+              }
+            </button>
+          } @else {
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Creating...</span>
+              } @else {
+                <app-lucide-icon name="building2" [size]="16" />
+                <span>Create Entity</span>
+              }
+            </button>
+          }
+
+          <a routerLink="/org/legal-entities" class="btn btn-secondary">
+            <app-lucide-icon name="x" [size]="16" />
+            <span>Cancel</span>
+          </a>
+        </div>
+
+        <div class="form-actions__feedback">
+          @if (successMessage) {
+            <div class="inline-note inline-note--success">
+              <app-lucide-icon name="checkCircle" [size]="16" />
+              <span>{{ successMessage }}</span>
+            </div>
+          }
+
+          @if (errorMessage) {
+            <div class="inline-note inline-note--danger">
+              <app-lucide-icon name="alertCircle" [size]="16" />
+              <span>{{ errorMessage }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  }
+</div>

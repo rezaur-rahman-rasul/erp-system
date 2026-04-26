@@ -1,151 +1,146 @@
 <div class="login-page">
-  <!-- Brand / value panel -->
-  <aside class="login-aside" aria-hidden="true">
-    <div class="aside-pattern"></div>
-    <div class="aside-frame aside-frame--tl"></div>
-    <div class="aside-frame aside-frame--br"></div>
-
-    <div class="aside-content">
-      <div class="aside-logo">
-        <span class="aside-logo-icon" aria-hidden="true">
-          <app-lucide-icon name="shieldCheck" [size]="28" />
+  <aside class="login-aside">
+    <div class="login-aside__panel">
+      <div class="login-aside__brand">
+        <span class="login-aside__logo">
+          <app-lucide-icon name="shieldCheck" [size]="26" />
         </span>
-        <span class="aside-logo-text">Hishab Nikash</span>
+        <div>
+          <p class="section-kicker">Hishab Nikash</p>
+          <h1>Hishab Nikash ERP</h1>
+        </div>
       </div>
-      <h1 class="aside-headline">Identity &amp; access, built for serious operations.</h1>
-      <p class="aside-lede">
-        Secure sign-in for your tenant. One place to manage users, roles, and who can do what.
-      </p>
-      <ul class="aside-points">
-        <li>
-          <span class="aside-point-icon"><app-lucide-icon name="check" [size]="16" /></span>
-          Tenant-scoped access control
-        </li>
-        <li>
-          <span class="aside-point-icon"><app-lucide-icon name="check" [size]="16" /></span>
-          Auditable IAM workflows
-        </li>
-        <li>
-          <span class="aside-point-icon"><app-lucide-icon name="check" [size]="16" /></span>
-          Enterprise-ready session handling
-        </li>
-      </ul>
-    </div>
 
-    <p class="aside-footnote">© {{ currentYear }} Hishab Nikash</p>
+      <div class="login-aside__copy">
+        <h2>Access management in one place.</h2>
+        <p>
+          Sign in to manage users, roles, permissions, and organization access from the same workspace.
+        </p>
+      </div>
+
+      <div class="login-aside__highlights">
+        @for (item of workspaceHighlights; track item.title) {
+          <article class="login-highlight">
+            <div class="login-highlight__icon">
+              <app-lucide-icon name="arrowUpRight" [size]="16" />
+            </div>
+            <div>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.detail }}</p>
+              <span>{{ item.caption }}</span>
+            </div>
+          </article>
+        }
+      </div>
+
+      <p class="login-aside__footnote">Copyright {{ currentYear }} Hishab Nikash</p>
+    </div>
   </aside>
 
-  <!-- Form panel -->
   <main class="login-main">
-    <div class="login-main-inner">
-      <div class="login-card">
-        <header class="card-header">
-          <p class="card-kicker">Sign in</p>
-          <h2 class="card-title">Welcome back</h2>
-          <p class="card-subtitle">Enter your credentials to continue to the console.</p>
-        </header>
-
-        @if (errorMessage()) {
-          <div class="error-alert" role="alert">
-            <app-lucide-icon name="alertCircle" [size]="18" />
-            <span>{{ errorMessage() }}</span>
-          </div>
-        }
-
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-          <div class="form-group">
-            <label for="identifier">Username or email</label>
-            <div
-              class="input-wrapper"
-              [class.input-error]="loginForm.get('identifier')?.invalid && loginForm.get('identifier')?.touched"
-            >
-              <app-lucide-icon name="user" [size]="18" class="input-icon" />
-              <input
-                id="identifier"
-                type="text"
-                formControlName="identifier"
-                placeholder="e.g. admin"
-                autocomplete="username"
-              />
-            </div>
-            @if (loginForm.get('identifier')?.invalid && loginForm.get('identifier')?.touched) {
-              <p class="error-text">Please enter your username or email</p>
-            }
-          </div>
-
-          <div class="form-group">
-            <label for="tenantId">Tenant ID</label>
-            <div
-              class="input-wrapper"
-              [class.input-error]="loginForm.get('tenantId')?.invalid && loginForm.get('tenantId')?.touched"
-            >
-              <app-lucide-icon name="building" [size]="18" class="input-icon" />
-              <input
-                id="tenantId"
-                type="text"
-                formControlName="tenantId"
-                placeholder="ERP-DEFAULT"
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="label-row">
-              <label for="password">Password</label>
-              <a href="#" class="forgot-link">Forgot password?</a>
-            </div>
-            <div
-              class="input-wrapper"
-              [class.input-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-            >
-              <app-lucide-icon name="lock" [size]="18" class="input-icon" />
-              <input
-                id="password"
-                [type]="showPassword() ? 'text' : 'password'"
-                formControlName="password"
-                placeholder="Enter your password"
-                autocomplete="current-password"
-              />
-              <button
-                type="button"
-                class="password-toggle"
-                (click)="togglePassword()"
-                [title]="showPassword() ? 'Hide password' : 'Show password'"
-              >
-                <app-lucide-icon [name]="showPassword() ? 'eyeOff' : 'eye'" [size]="18" />
-              </button>
-            </div>
-            @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-              <p class="error-text">Password must be at least 6 characters</p>
-            }
-          </div>
-
-          <div class="options-row">
-            <label class="checkbox-wrapper">
-              <input type="checkbox" formControlName="rememberMe" />
-              <span class="checkbox-label">Keep me signed in on this device</span>
-            </label>
-          </div>
-
-          <button type="submit" class="submit-btn" [disabled]="isLoading()">
-            @if (isLoading()) {
-              <app-lucide-icon name="loader2" [size]="20" class="animate-spin" />
-              <span>Signing in…</span>
-            } @else {
-              <span>Sign in</span>
-              <app-lucide-icon name="arrowRight" [size]="18" />
-            }
-          </button>
-        </form>
-
-        <footer class="card-footer">
-          <p>Need access? <a href="#">Contact your administrator</a></p>
-        </footer>
+    <div class="login-card surface-card">
+      <div class="login-card__head">
+        <p class="section-kicker">Secure sign in</p>
+        <h2>Enter your tenant credentials</h2>
+        <p>
+          Use your username, password, and tenant ID to continue.
+        </p>
       </div>
 
-      <p class="login-legal">
-        By signing in you agree to your organization’s security policies.
-      </p>
+      @if (errorMessage()) {
+        <div class="inline-note inline-note--danger">
+          <app-lucide-icon name="alertCircle" [size]="16" />
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <label class="field-shell">
+          <span class="field-label">Tenant id</span>
+          <div class="field-shell__input">
+            <app-lucide-icon
+              name="building2"
+              [size]="16"
+              class="field-shell__icon"
+            />
+            <input
+              type="text"
+              class="field-input"
+              formControlName="tenantId"
+              placeholder="ERP-DEFAULT"
+            />
+          </div>
+        </label>
+
+        <label class="field-shell">
+          <span class="field-label">Username or email</span>
+          <div class="field-shell__input">
+            <app-lucide-icon name="user" [size]="16" class="field-shell__icon" />
+            <input
+              type="text"
+              class="field-input"
+              formControlName="identifier"
+              placeholder="admin or admin@example.com"
+              autocomplete="username"
+            />
+          </div>
+          @if (loginForm.get('identifier')?.invalid && loginForm.get('identifier')?.touched) {
+            <span class="field-error">Please enter a valid identifier.</span>
+          }
+        </label>
+
+        <label class="field-shell">
+          <div class="login-form__label-row">
+            <span class="field-label">Password</span>
+            <span class="login-form__hint">Minimum 6 characters</span>
+          </div>
+
+          <div class="field-shell__input">
+            <app-lucide-icon name="lock" [size]="16" class="field-shell__icon" />
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              class="field-input"
+              formControlName="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+            />
+
+            <button
+              type="button"
+              class="login-password-toggle"
+              (click)="togglePassword()"
+            >
+              <app-lucide-icon
+                [name]="showPassword() ? 'eyeOff' : 'eye'"
+                [size]="16"
+              />
+            </button>
+          </div>
+
+          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <span class="field-error">Password must be at least 6 characters.</span>
+          }
+        </label>
+
+        <label class="login-checkbox">
+          <input type="checkbox" formControlName="rememberMe" />
+          <span>Keep me signed in on this device</span>
+        </label>
+
+        <button type="submit" class="btn btn-primary login-submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+            <span>Signing in...</span>
+          } @else {
+            <span>Sign in</span>
+            <app-lucide-icon name="arrowRight" [size]="16" />
+          }
+        </button>
+      </form>
+
+      <div class="login-card__footer">
+        <p>Need access? Contact your administrator before requesting a tenant account.</p>
+      </div>
     </div>
   </main>
 </div>

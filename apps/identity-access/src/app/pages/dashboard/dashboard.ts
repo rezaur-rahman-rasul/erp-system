@@ -1,68 +1,165 @@
-import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import {
-  LucideAngularModule,
-  Users,
-  Clock,
-  CheckCircle,
-  Zap,
-  List,
-  TrendingUp,
-  CalendarDays,
-  ShieldCheck,
-  ArrowUpRight,
-} from 'lucide-angular';
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '@hishab-nikash/shared-auth';
+import { LucideIcon } from '@hishab-nikash/shared-ui';
+import {
+  AuthorizationResource,
+  PermissionDefinition,
+  Role,
+  User,
+} from '@hishab-nikash/shared-models';
+import { forkJoin } from 'rxjs';
+import { IAMService } from '../../services/iam.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, LucideAngularModule],
+  imports: [CommonModule, RouterLink, LucideIcon],
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.scss'],
-  host: { class: 'block' },
+  styleUrl: './dashboard.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent {
-  readonly Users = Users;
-  readonly Clock = Clock;
-  readonly CheckCircle = CheckCircle;
-  readonly Zap = Zap;
-  readonly List = List;
-  readonly TrendingUp = TrendingUp;
-  readonly CalendarDays = CalendarDays;
-  readonly ShieldCheck = ShieldCheck;
-  readonly ArrowUpRight = ArrowUpRight;
+  private readonly iamService = inject(IAMService);
+  readonly currentUser = inject(AuthService).currentUser;
 
-  readonly kpiCards = [
-    { title: 'Total Users', value: '25', note: 'Registered accounts', trend: '+8.2% this month', icon: this.Users },
-    { title: 'Roles', value: '12', note: 'Defined role sets', trend: '+1 this week', icon: this.ShieldCheck },
-    { title: 'Policies', value: '34', note: 'Permission policies', trend: '+3 updated', icon: this.Zap },
-    { title: 'Active Sessions', value: '19', note: 'Currently signed in', trend: 'Peak 31 today', icon: this.Clock },
-    { title: 'Failed Logins (24h)', value: '7', note: 'Blocked / invalid', trend: '-2 vs yesterday', icon: this.TrendingUp },
+  readonly isLoading = signal(true);
+  readonly loadError = signal('');
+  readonly users = signal<User[]>([]);
+  readonly roles = signal<Role[]>([]);
+  readonly permissions = signal<PermissionDefinition[]>([]);
+  readonly resources = signal<AuthorizationResource[]>([]);
+
+  readonly moduleCards = [
+    {
+      title: 'Sign-in',
+      caption: 'Secure access',
+      detail: 'Manage sign-in, session, and account access.',
+      icon: 'keyRound',
+    },
+    {
+      title: 'Users',
+      caption: 'People records',
+      detail: 'Create, update, list, and change user status.',
+      icon: 'users',
+    },
+    {
+      title: 'Roles',
+      caption: 'Role setup',
+      detail: 'Maintain roles and the permissions assigned to them.',
+      icon: 'shieldCheck',
+    },
+    {
+      title: 'Organization Access',
+      caption: 'Entity access',
+      detail: 'Track legal-entity and branch-level access.',
+      icon: 'building2',
+    },
+    {
+      title: 'Permissions',
+      caption: 'Permission list',
+      detail: 'Review the permissions available across the system.',
+      icon: 'shieldEllipsis',
+    },
+    {
+      title: 'Access Areas',
+      caption: 'Access coverage',
+      detail: 'Review access areas and the permissions linked to them.',
+      icon: 'waypoints',
+    },
   ];
 
-  readonly quickActions = [
-    { label: 'Add Customer', icon: this.Users },
-    { label: 'Create Role', icon: this.ShieldCheck },
-    { label: 'Review Policies', icon: this.Zap },
-    { label: 'Audit Logs', icon: this.List },
-    { label: 'Session Monitor', icon: this.Clock },
-    { label: 'Security Trends', icon: this.TrendingUp },
-  ];
+  readonly activeUsersCount = computed(
+    () => this.users().filter((user) => user.status === 'ACTIVE').length
+  );
 
-  readonly posture = [
-    { label: 'MFA Coverage', value: '62%', tone: 'gold', note: 'Users enrolled in MFA' },
-    { label: 'Locked Accounts', value: '2', tone: 'slate', note: 'Temporary lockouts' },
-    { label: 'Risk Status', value: 'Normal', tone: 'emerald', note: 'No active incidents' },
-  ];
+  readonly serviceCount = computed(() =>
+    new Set(this.permissions().map((permission) => permission.service)).size
+  );
 
-  readonly auditEvents = [
-    { time: '2m ago', actor: 'admin', action: 'Updated role', target: 'Finance Manager', result: 'Success' },
-    { time: '18m ago', actor: 'system', action: 'Token refresh', target: 'Session #A1C9', result: 'Success' },
-    { time: '1h ago', actor: 'rezaur', action: 'Failed login', target: 'tenant ERP-DEFAULT', result: 'Blocked' },
-    { time: '3h ago', actor: 'admin', action: 'Created user', target: 'user: arif', result: 'Success' },
-    { time: 'Yesterday', actor: 'admin', action: 'Policy change', target: 'users:read → roles:read', result: 'Success' },
-  ];
+  readonly currentUserAccessCount = computed(
+    () => this.currentUser()?.organizationAccesses?.length ?? 0
+  );
+
+  readonly summaryCards = computed(() => [
+    {
+      label: 'Users',
+      value: this.users().length,
+      note: `${this.activeUsersCount()} active`,
+      icon: 'users',
+    },
+    {
+      label: 'Roles',
+      value: this.roles().length,
+      note: 'Available roles',
+      icon: 'shieldCheck',
+    },
+    {
+      label: 'Permissions',
+      value: this.permissions().length,
+      note: `${this.serviceCount()} services`,
+      icon: 'shieldEllipsis',
+    },
+    {
+      label: 'Access Areas',
+      value: this.resources().length,
+      note: 'Available access points',
+      icon: 'libraryBig',
+    },
+    {
+      label: 'Org Access',
+      value: this.currentUserAccessCount(),
+      note: 'Current user assignments',
+      icon: 'building2',
+    },
+  ]);
+
+  readonly serviceCoverage = computed(() =>
+    Array.from(
+      this.permissions().reduce((accumulator, permission) => {
+        const currentCount = accumulator.get(permission.service) ?? 0;
+        accumulator.set(permission.service, currentCount + 1);
+        return accumulator;
+      }, new Map<string, number>())
+    )
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 5)
+  );
+
+  readonly topRoles = computed(() =>
+    [...this.roles()]
+      .sort((left, right) => right.permissions.length - left.permissions.length)
+      .slice(0, 5)
+  );
+
+  readonly topTenants = computed(() =>
+    Array.from(
+      this.users().reduce((accumulator, user) => {
+        const currentCount = accumulator.get(user.tenantId) ?? 0;
+        accumulator.set(user.tenantId, currentCount + 1);
+        return accumulator;
+      }, new Map<string, number>())
+    )
+      .sort((left, right) => right[1] - left[1])
+      .slice(0, 4)
+  );
+
+  readonly resourceHighlights = computed(() =>
+    [...this.resources()]
+      .sort((left, right) => left.fullCode.localeCompare(right.fullCode))
+      .slice(0, 6)
+  );
+
+  constructor() {
+    this.loadDashboard();
+  }
 
   get todayLabel(): string {
     return new Intl.DateTimeFormat('en', {
@@ -73,9 +170,42 @@ export class DashboardComponent {
   }
 
   get greeting(): string {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 17) return 'Good afternoon';
+    const currentHour = new Date().getHours();
+
+    if (currentHour < 12) {
+      return 'Good morning';
+    }
+
+    if (currentHour < 17) {
+      return 'Good afternoon';
+    }
+
     return 'Good evening';
+  }
+
+  private loadDashboard(): void {
+    this.isLoading.set(true);
+    this.loadError.set('');
+
+    forkJoin({
+      users: this.iamService.getUsers({ page: 1, limit: 1000 }),
+      roles: this.iamService.getRoles(),
+      permissions: this.iamService.getPermissionDefinitions(),
+      resources: this.iamService.getAuthorizationResources(),
+    }).subscribe({
+      next: ({ users, roles, permissions, resources }) => {
+        this.users.set(users);
+        this.roles.set(roles);
+        this.permissions.set(permissions);
+        this.resources.set(resources);
+        this.isLoading.set(false);
+      },
+      error: (error) => {
+        this.loadError.set(
+          error?.error?.message || 'Failed to load dashboard information.'
+        );
+        this.isLoading.set(false);
+      },
+    });
   }
 }

@@ -1,0 +1,279 @@
+<div class="catalog-page page-shell">
+  <app-list-header
+    icon="libraryBig"
+    badge="Access Control"
+    title="Access Directory"
+    subtitle="Browse permissions, access areas, and role setup details."
+    actionText="Create Role"
+    actionRoute="/iam/roles/create"
+  ></app-list-header>
+
+  <app-list-overview
+    icon="shieldCheck"
+    title="Coverage overview"
+    subtitle="Review available permissions and access areas in one place."
+    metricLabel="Available Items"
+    [metricValue]="permissions().length + resources().length"
+    guidanceTitle="Quick notes"
+    [guidanceItems]="guidanceItems"
+  ></app-list-overview>
+
+  <section class="catalog-summary surface-card">
+    <div class="catalog-summary__header">
+      <div>
+        <p class="section-kicker">Access Overview</p>
+        <h2 class="section-title">Access setup at a glance</h2>
+        <p class="section-copy">
+          Use this view when reviewing role setup, access coverage, or how permissions connect to each access area.
+        </p>
+      </div>
+
+      @if (actionError()) {
+        <div class="inline-note inline-note--danger">
+          <app-lucide-icon name="alertCircle" [size]="16" />
+          <span>{{ actionError() }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="catalog-summary__grid">
+      <article class="metric-tile">
+        <p class="metric-tile__eyebrow">Modules</p>
+        <p class="metric-tile__value">{{ services().length }}</p>
+        <p class="metric-tile__note">Distinct system areas</p>
+      </article>
+
+      <article class="metric-tile">
+        <p class="metric-tile__eyebrow">Access Areas</p>
+        <p class="metric-tile__value">{{ resources().length }}</p>
+        <p class="metric-tile__note">Available access points</p>
+      </article>
+
+      <article class="metric-tile">
+        <p class="metric-tile__eyebrow">Permissions</p>
+        <p class="metric-tile__value">{{ permissions().length }}</p>
+        <p class="metric-tile__note">Available permissions</p>
+      </article>
+
+      <article class="metric-tile">
+        <p class="metric-tile__eyebrow">Links</p>
+        <p class="metric-tile__value">{{ permissionBindingCount() }}</p>
+        <p class="metric-tile__note">Connections between access areas and permissions</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="catalog-content">
+    <article class="catalog-panel surface-card">
+      <div class="catalog-panel__header">
+        <div>
+          <p class="section-kicker">Access Areas</p>
+          <h2 class="section-title">Browse access areas</h2>
+        </div>
+      </div>
+
+      <div class="catalog-panel__filters">
+        <label class="field-shell catalog-filter">
+          <span class="field-label">Search</span>
+          <div class="field-shell__input">
+            <app-lucide-icon
+              name="search"
+              [size]="16"
+              class="field-shell__icon"
+            />
+            <input
+              type="text"
+              class="field-input"
+              placeholder="Find by code, full code, name, or type"
+              [value]="query()"
+              (input)="setQuery($any($event.target).value)"
+            />
+          </div>
+        </label>
+
+        <label class="field-shell catalog-filter">
+          <span class="field-label">Module</span>
+          <div class="field-shell__select">
+            <select
+              class="field-select"
+              [value]="serviceFilter()"
+              (change)="setServiceFilter($any($event.target).value)"
+            >
+              <option value="all">All services</option>
+              @for (service of services(); track service) {
+                <option [value]="service">{{ service }}</option>
+              }
+            </select>
+          </div>
+        </label>
+      </div>
+
+      @if (isLoading()) {
+        <div class="catalog-state">
+          <app-lucide-icon
+            name="loaderCircle"
+            [size]="18"
+            class="animate-spin"
+          />
+          <span>Loading access information...</span>
+        </div>
+      } @else if (filteredResources().length === 0) {
+        <div class="empty-state-card">
+          <app-lucide-icon name="folderSearch" [size]="20" />
+          <div>
+            <h3>No access areas match the current filter</h3>
+            <p>Try another module filter or broaden the search text.</p>
+          </div>
+        </div>
+      } @else {
+        <div class="catalog-resource-list">
+          @for (resource of filteredResources(); track trackByResource($index, resource)) {
+            <button
+              type="button"
+              class="catalog-resource"
+              [class.catalog-resource--active]="selectedResource()?.id === resource.id"
+              (click)="selectResource(resource)"
+            >
+              <div class="catalog-resource__top">
+                <span class="status-chip status-chip--neutral">
+                  {{ resource.serviceCode }}
+                </span>
+                <span
+                  class="status-chip"
+                  [class.status-chip--success]="resource.status.toLowerCase() === 'active'"
+                >
+                  {{ resource.status || 'Unknown' }}
+                </span>
+              </div>
+
+              <div class="catalog-resource__body">
+                <h3>{{ resource.name }}</h3>
+                <p>{{ resource.fullCode }}</p>
+              </div>
+
+              <div class="catalog-resource__meta">
+                <span>{{ resource.type }}</span>
+                <span>Depth {{ resource.pathDepth }}</span>
+              </div>
+            </button>
+          }
+        </div>
+      }
+    </article>
+
+    <article class="catalog-panel surface-card">
+      @if (selectedResource(); as resource) {
+        <div class="catalog-panel__header catalog-panel__header--detail">
+          <div>
+            <p class="section-kicker">Access Area Details</p>
+            <h2 class="section-title">{{ resource.name }}</h2>
+            <p class="section-copy">{{ resource.fullCode }}</p>
+          </div>
+
+          <div class="catalog-detail__chips">
+            <span class="status-chip status-chip--accent">
+              {{ resource.serviceCode }}
+            </span>
+            <span class="status-chip status-chip--neutral">{{ resource.type }}</span>
+            <span
+              class="status-chip"
+              [class.status-chip--success]="resource.status.toLowerCase() === 'active'"
+            >
+              {{ resource.status || 'Unknown' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="catalog-detail__grid">
+          <article class="catalog-detail__card">
+            <p class="catalog-detail__label">Code</p>
+            <p class="catalog-detail__value">{{ resource.code }}</p>
+          </article>
+
+          <article class="catalog-detail__card">
+            <p class="catalog-detail__label">Parent</p>
+            <p class="catalog-detail__value">
+              {{ resource.parentFullCode || 'Top-level area' }}
+            </p>
+          </article>
+
+          <article class="catalog-detail__card">
+            <p class="catalog-detail__label">Path depth</p>
+            <p class="catalog-detail__value">{{ resource.pathDepth }}</p>
+          </article>
+
+          <article class="catalog-detail__card">
+            <p class="catalog-detail__label">Active areas</p>
+            <p class="catalog-detail__value">{{ activeResourceCount() }}</p>
+          </article>
+        </div>
+
+        <div class="catalog-detail__section">
+          <div class="catalog-detail__section-head">
+            <div>
+              <p class="section-kicker">Linked Permissions</p>
+              <h3 class="catalog-detail__title">
+                {{ selectedResourcePermissions().length }} permission(s)
+              </h3>
+            </div>
+          </div>
+
+          @if (selectedResourcePermissions().length === 0) {
+            <div class="empty-state-card">
+              <app-lucide-icon name="shieldAlert" [size]="20" />
+              <div>
+                <h3>No permissions are linked yet</h3>
+                <p>This access area exists, but no permissions have been linked to it yet.</p>
+              </div>
+            </div>
+          } @else {
+            <div class="catalog-permission-list">
+              @for (permission of selectedResourcePermissions(); track trackByPermission($index, permission)) {
+                <article class="catalog-permission">
+                  <div class="catalog-permission__head">
+                    <h4>{{ permission.permissionKey }}</h4>
+                    <span class="status-chip status-chip--neutral">
+                      {{ permission.actionCode }}
+                    </span>
+                  </div>
+
+                  <p>{{ permission.description || 'No description available.' }}</p>
+
+                  <div class="catalog-permission__meta">
+                    <span>{{ permission.serviceCode }}</span>
+                    @if (permission.aliases.length > 0) {
+                      <span>{{ permission.aliases.length }} alias(es)</span>
+                    }
+                  </div>
+
+                  @if (permission.aliases.length > 0) {
+                    <div class="catalog-permission__aliases">
+                      @for (alias of permission.aliases; track alias) {
+                        <span class="status-chip status-chip--soft">{{ alias }}</span>
+                      }
+                    </div>
+                  }
+                </article>
+              }
+            </div>
+          }
+        </div>
+
+        @if (resource.metadata) {
+          <div class="catalog-detail__section">
+            <p class="section-kicker">Metadata</p>
+            <pre class="catalog-metadata">{{ resource.metadata }}</pre>
+          </div>
+        }
+      } @else {
+        <div class="empty-state-card empty-state-card--full">
+          <app-lucide-icon name="panelRightClose" [size]="20" />
+          <div>
+            <h3>Select an access area</h3>
+            <p>Choose an access area from the list to review its details and linked permissions.</p>
+          </div>
+        </div>
+      }
+    </article>
+  </section>
+</div>

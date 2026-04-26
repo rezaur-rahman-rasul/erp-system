@@ -1,0 +1,186 @@
+<div class="master-catalog page-shell">
+  <app-list-header
+    icon="tableProperties"
+    badge="Master Data Service"
+    title="Master Data Catalog"
+    subtitle="Browse the service domains, their endpoint conventions, and a preview of the live records returned by the master-data service."
+  ></app-list-header>
+
+  <app-list-overview
+    icon="databaseZap"
+    title="Aligned service explorer"
+    subtitle="The frontend now reflects the actual backend service surface instead of leaving Master Data disconnected from the shell."
+    metricLabel="Visible Records"
+    [metricValue]="totalRecords()"
+    guidanceTitle="What This View Solves"
+    [guidanceItems]="guidanceItems"
+  ></app-list-overview>
+
+  @if (loadError()) {
+    <div class="inline-note inline-note--danger">
+      <app-lucide-icon name="alertCircle" [size]="16" />
+      <span>{{ loadError() }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="empty-state-card empty-state-card--full">
+      <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+      <div>
+        <h3>Loading catalog</h3>
+        <p>Collecting the master-data domains and preview rows.</p>
+      </div>
+    </div>
+  } @else {
+    <section class="catalog-toolbar surface-card">
+      <div>
+        <p class="section-kicker">Browse By Area</p>
+        <h2 class="section-title">Master-data domains</h2>
+        <p class="section-copy">
+          Filter the workspace by business area to isolate reference sets,
+          commercial parties, operational masters, finance structure, or people
+          records.
+        </p>
+      </div>
+
+      <div class="catalog-toolbar__filters">
+        @for (category of categoryOptions; track category.key) {
+          <button
+            type="button"
+            class="catalog-filter"
+            [class.catalog-filter--active]="isCategorySelected(category.key)"
+            (click)="setCategory(category.key)"
+          >
+            <app-lucide-icon [name]="category.icon" [size]="16" />
+            <span>{{ category.title }}</span>
+          </button>
+        }
+      </div>
+    </section>
+
+    <div class="catalog-stack">
+      @for (category of categoryStates(); track category.key) {
+        <section class="catalog-section surface-card">
+          <div class="catalog-section__header">
+            <div>
+              <div class="catalog-section__eyebrow">
+                <app-lucide-icon [name]="category.icon" [size]="15" />
+                <span>{{ category.title }}</span>
+              </div>
+              <h2>{{ category.domainCount }} dataset(s)</h2>
+              <p>{{ category.description }}</p>
+            </div>
+
+            <div class="catalog-section__summary">
+              <span class="status-chip status-chip--soft">
+                {{ category.recordCount }} records
+              </span>
+              <span class="status-chip status-chip--success">
+                {{ category.activeCount }} active
+              </span>
+            </div>
+          </div>
+
+          <div class="catalog-domain-grid">
+            @for (domain of category.domains; track domain.key) {
+              <article class="catalog-domain-card">
+                <div class="catalog-domain-card__header">
+                  <div class="catalog-domain-card__title">
+                    <div class="catalog-domain-card__icon">
+                      <app-lucide-icon [name]="domain.icon" [size]="18" />
+                    </div>
+
+                    <div>
+                      <h3>{{ domain.title }}</h3>
+                      <p>{{ domain.summary }}</p>
+                    </div>
+                  </div>
+
+                  <div class="catalog-domain-card__summary">
+                    <span class="status-chip status-chip--neutral">
+                      {{ domain.count }} record(s)
+                    </span>
+                    <span class="status-chip status-chip--success">
+                      {{ domain.activeCount }} active
+                    </span>
+                  </div>
+                </div>
+
+                <div class="catalog-domain-card__meta">
+                  <div>
+                    <span class="catalog-meta-label">Endpoint</span>
+                    <p>{{ domain.endpoint }}</p>
+                  </div>
+                  <div>
+                    <span class="catalog-meta-label">Permission</span>
+                    <p>{{ domain.permission }}</p>
+                  </div>
+                </div>
+
+                <div class="catalog-domain-card__tags">
+                  @for (dependency of domain.dependencies; track dependency) {
+                    <span class="status-chip status-chip--soft">{{ dependency }}</span>
+                  }
+                  @if (domain.tenantScoped) {
+                    <span class="status-chip status-chip--accent">Tenant scoped</span>
+                  }
+                  @if (domain.organizationLinked) {
+                    <span class="status-chip status-chip--warning">Org linked</span>
+                  }
+                </div>
+
+                @if (domain.previewRows.length === 0) {
+                  <div class="catalog-empty-state">
+                    <app-lucide-icon name="inbox" [size]="18" />
+                    <span>No records returned from this endpoint yet.</span>
+                  </div>
+                } @else {
+                  <div class="catalog-table-scroll">
+                    <table class="catalog-table">
+                      <thead>
+                        <tr>
+                          @for (column of domain.previewColumns; track column.label) {
+                            <th>{{ column.label }}</th>
+                          }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of domain.previewRows; track row.id) {
+                          <tr>
+                            @for (column of domain.previewColumns; track column.label) {
+                              <td>
+                                @if (column.tone) {
+                                  <span
+                                    class="status-chip"
+                                    [ngClass]="resolveToneClass(column.tone(row))"
+                                  >
+                                    {{ column.value(row) }}
+                                  </span>
+                                } @else {
+                                  <span
+                                    [class.catalog-table__primary]="$index === 0"
+                                  >
+                                    {{ column.value(row) }}
+                                  </span>
+                                }
+                              </td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+
+                <div class="catalog-domain-card__footer">
+                  <span>Latest update: {{ domain.lastUpdatedLabel }}</span>
+                  <span>{{ domain.inactiveCount }} inactive</span>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,306 @@
+<div class="organization-page page-shell">
+  <app-list-header
+    icon="building2"
+    badge="Organization Setup"
+    title="Legal Entities"
+    subtitle="Manage the registered companies and operating entities that anchor the organization structure."
+    actionText="Create Entity"
+    actionRoute="/org/legal-entities/create"
+  ></app-list-header>
+
+  <app-list-overview
+    icon="layoutDashboard"
+    title="Legal entity overview"
+    subtitle="Review each entity’s business identity, finance base, and current operating status."
+    metricLabel="Visible Entities"
+    [metricValue]="totalEntitiesCount()"
+    guidanceTitle="Quick notes"
+    [guidanceItems]="guidanceItems"
+  ></app-list-overview>
+
+  <section class="table-shell">
+    <div class="table-shell-header">
+      <div>
+        <h2 class="table-shell-title">Legal entity list</h2>
+        <p class="table-shell-subtitle">
+          Keep the top-level organization records complete before branching into
+          units and locations.
+        </p>
+      </div>
+
+      <div class="records-toolbar">
+        <div class="records-toolbar__chips">
+          <span class="records-toolbar__chip">{{ activeEntitiesCount() }} active</span>
+          <span class="records-toolbar__chip">{{ inactiveEntitiesCount() }} inactive</span>
+          <span class="records-toolbar__chip">{{ countryCount() }} countries</span>
+        </div>
+
+        @if (actionMessage()) {
+          <div class="records-feedback records-feedback--success">
+            {{ actionMessage() }}
+          </div>
+        }
+
+        @if (actionError()) {
+          <div class="records-feedback records-feedback--danger">
+            {{ actionError() }}
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th class="text-center" style="width: 56px">Sl.</th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('code')">
+                <span>Code</span>
+                <span class="sort-icon">{{ sortIcon('code') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('legalName')">
+                <span>Entity</span>
+                <span class="sort-icon">{{ singleArrowSortIcon('legalName') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('countryCode')">
+                <span>Country</span>
+                <span class="sort-icon">{{ sortIcon('countryCode') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('baseCurrencyCode')">
+                <span>Currency</span>
+                <span class="sort-icon">{{ sortIcon('baseCurrencyCode') }}</span>
+              </button>
+            </th>
+            <th class="text-center">
+              <button
+                type="button"
+                class="th-btn th-btn-center"
+                (click)="toggleSort('fiscalYearStartMonth')"
+              >
+                <span>Fiscal Start</span>
+                <span class="sort-icon">{{ sortIcon('fiscalYearStartMonth') }}</span>
+              </button>
+            </th>
+            <th class="text-center">
+              <button
+                type="button"
+                class="th-btn th-btn-center"
+                (click)="toggleSort('status')"
+              >
+                <span>Status</span>
+                <span class="sort-icon">{{ sortIcon('status') }}</span>
+              </button>
+            </th>
+            <th>
+              <span class="th-btn cursor-default hover:bg-transparent">
+                <span>Contact</span>
+              </span>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('lastUpdatedAt')">
+                <span>Updated</span>
+                <span class="sort-icon">{{ sortIcon('lastUpdatedAt') }}</span>
+              </button>
+            </th>
+            <th class="text-center">Actions</th>
+          </tr>
+
+          <tr class="filter-row">
+            <th></th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter code"
+                [value]="filters().code"
+                (input)="setFilter('code', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter entity"
+                [value]="filters().legalName"
+                (input)="setFilter('legalName', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter country"
+                [value]="filters().countryCode"
+                (input)="setFilter('countryCode', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter currency"
+                [value]="filters().baseCurrencyCode"
+                (input)="setFilter('baseCurrencyCode', $any($event.target).value)"
+              />
+            </th>
+            <th></th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Status"
+                [value]="filters().status"
+                (input)="setFilter('status', $any($event.target).value)"
+              />
+            </th>
+            <th></th>
+            <th>
+              <input
+                class="filter-input"
+                type="date"
+                [value]="filters().updatedAt"
+                (input)="setFilter('updatedAt', $any($event.target).value)"
+              />
+            </th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody [class.data-rows-container]="!isLoading()">
+          @if (isLoading()) {
+            @for (row of skeletonRows; track $index) {
+              <tr class="skeleton-row">
+                <td><div class="skeleton-cell w-8 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 58%"></div></td>
+                <td><div class="skeleton-cell" style="width: 72%"></div></td>
+                <td><div class="skeleton-cell" style="width: 44%"></div></td>
+                <td><div class="skeleton-cell" style="width: 40%"></div></td>
+                <td><div class="skeleton-cell w-20 mx-auto"></div></td>
+                <td><div class="skeleton-cell w-24 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 82%"></div></td>
+                <td><div class="skeleton-cell" style="width: 70%"></div></td>
+                <td><div class="skeleton-cell w-24 mx-auto"></div></td>
+              </tr>
+            }
+          }
+
+          @if (!isLoading() && pagedEntities().length === 0) {
+            <tr>
+              <td colspan="10" class="empty-row-cell">
+                <div class="empty-state-inline">
+                  <div class="empty-icon">
+                    <app-lucide-icon name="building2" [size]="28" />
+                  </div>
+                  <h3 class="empty-title">No legal entities matched the current filters</h3>
+                  <p class="empty-subtitle">
+                    Adjust the filters or create a new legal entity.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (!isLoading()) {
+            @for (entity of pagedEntities(); track trackEntity($index, entity); let i = $index) {
+              <tr class="data-row">
+                <td class="records-serial">{{ serialOf(i) }}</td>
+
+                <td>
+                  <a
+                    class="order-link"
+                    [routerLink]="['/org/legal-entities', entity.id, 'edit']"
+                    title="Edit legal entity"
+                  >
+                    <span>{{ entity.code }}</span>
+                    <app-lucide-icon name="sparkles" [size]="14" />
+                  </a>
+                </td>
+
+                <td>
+                  <div class="records-primary">
+                    <span class="records-primary__title">{{ entity.legalName }}</span>
+                    <span class="records-primary__meta">
+                      {{ entity.tradeName || 'No trade name' }}
+                    </span>
+                  </div>
+                </td>
+
+                <td class="records-muted">{{ entity.countryCode || '--' }}</td>
+                <td class="records-muted">{{ entity.baseCurrencyCode || '--' }}</td>
+
+                <td class="text-center">
+                  <span class="status-badge status-default">
+                    {{ fiscalMonthLabel(entity.fiscalYearStartMonth) }}
+                  </span>
+                </td>
+
+                <td class="text-center">
+                  <span class="status-badge" [class]="statusClass(entity.status)">
+                    {{ entity.status }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="records-stack">
+                    <span class="records-muted">{{ entity.email || 'Email not set' }}</span>
+                    <span class="records-code">{{ entity.phone || 'Phone not set' }}</span>
+                  </div>
+                </td>
+
+                <td class="records-muted">
+                  {{ formatDate(entity.lastUpdatedAt || entity.createdAt) }}
+                </td>
+
+                <td>
+                  <div class="action-group">
+                    <a
+                      [routerLink]="['/org/legal-entities', entity.id, 'edit']"
+                      class="action-btn action-amber"
+                    >
+                      Edit
+                    </a>
+
+                    <button
+                      type="button"
+                      class="action-btn action-emerald"
+                      [disabled]="isStatusChanging(entity.id)"
+                      [class.opacity-60]="isStatusChanging(entity.id)"
+                      [class.cursor-not-allowed]="isStatusChanging(entity.id)"
+                      (click)="toggleStatus(entity)"
+                    >
+                      @if (isStatusChanging(entity.id)) {
+                        Updating...
+                      } @else {
+                        {{ statusActionLabel(entity) }}
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isLoading()) {
+      <app-list-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [rowsPerPage]="rowsPerPage()"
+        [pageInfo]="pageInfo()"
+        (rowsPerPageChange)="setRowsPerPage($event)"
+        (prevPage)="prevPage()"
+        (nextPage)="nextPage()"
+        (goToPage)="goToPage($event)"
+      ></app-list-pagination>
+    }
+  </section>
+</div>

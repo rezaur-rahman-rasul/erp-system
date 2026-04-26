@@ -1,0 +1,217 @@
+<div class="form-page page-shell">
+  @if (isEditMode()) {
+    <app-form-header
+      icon="pencil"
+      badge="Organization Setup"
+      title="Edit Department"
+      subtitle="Update department ownership, reporting line, and record status."
+      actionText="Back to Departments"
+      actionRoute="/org/departments"
+    ></app-form-header>
+  } @else {
+    <app-form-header
+      icon="network"
+      badge="Organization Setup"
+      title="Create Department"
+      subtitle="Add a department and connect it to the right branch and parent structure."
+      actionText="Back to Departments"
+      actionRoute="/org/departments"
+    ></app-form-header>
+  }
+
+  @if (isLoadingDepartment() || isLoadingOptions()) {
+    <div class="loading-state surface-card">
+      <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+      <span>Loading department data...</span>
+    </div>
+  } @else {
+    <form #departmentForm="ngForm" (ngSubmit)="saveDepartment(departmentForm)" novalidate class="form-stack">
+      <div class="form-layout">
+        <div class="form-main">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Core details</p>
+                <h2 class="section-title">Department profile</h2>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field-shell">
+                <span class="field-label">Legal entity <span class="required-star">*</span></span>
+                <div class="field-shell__select">
+                  <select class="field-select" name="legalEntityId" [(ngModel)]="form.legalEntityId" required [disabled]="isEditMode()">
+                    <option value="">Select legal entity</option>
+                    @for (entity of legalEntities(); track entity.id) {
+                      <option [value]="entity.id">{{ entity.legalName }}</option>
+                    }
+                  </select>
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Branch</span>
+                <div class="field-shell__select">
+                  <select class="field-select" name="branchId" [(ngModel)]="form.branchId">
+                    <option value="">Not linked</option>
+                    @for (branch of branches(); track branch.id) {
+                      <option [value]="branch.id">{{ branch.name }}</option>
+                    }
+                  </select>
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Code <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="hash" [size]="16" class="field-shell__icon" />
+                  <input type="text" class="field-input" name="code" [(ngModel)]="form.code" required maxlength="40" [readonly]="isEditMode()" placeholder="e.g. FINANCE" #codeCtrl="ngModel" />
+                </div>
+                @if (codeCtrl.invalid && codeCtrl.touched) {
+                  <span class="field-error">Code is required.</span>
+                }
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Department name <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="network" [size]="16" class="field-shell__icon" />
+                  <input type="text" class="field-input" name="name" [(ngModel)]="form.name" required maxlength="160" placeholder="e.g. Finance & Accounts" #nameCtrl="ngModel" />
+                </div>
+                @if (nameCtrl.invalid && nameCtrl.touched) {
+                  <span class="field-error">Department name is required.</span>
+                }
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Structure</p>
+                <h2 class="section-title">Reporting details</h2>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field-shell">
+                <span class="field-label">Parent department</span>
+                <div class="field-shell__select">
+                  <select class="field-select" name="parentDepartmentId" [(ngModel)]="form.parentDepartmentId">
+                    <option value="">Top level department</option>
+                    @for (department of availableParentDepartments(); track department.id) {
+                      <option [value]="department.id">{{ department.name }}</option>
+                    }
+                  </select>
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Department head</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="userRoundCog" [size]="16" class="field-shell__icon" />
+                  <input type="text" class="field-input" name="headEmployeeId" [(ngModel)]="form.headEmployeeId" maxlength="80" placeholder="Employee id or staff code" />
+                </div>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <aside class="form-sidebar">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Record summary</p>
+                <h2 class="section-title">Department snapshot</h2>
+              </div>
+            </div>
+
+            <div class="summary-list">
+              <article class="summary-card">
+                <p class="summary-card__eyebrow">Legal entity</p>
+                <p class="summary-card__value">{{ selectedEntityName() }}</p>
+                <p class="summary-card__meta">Departments inherit their top-level context from the legal entity.</p>
+              </article>
+              <article class="summary-card">
+                <p class="summary-card__eyebrow">Branch</p>
+                <p class="summary-card__value">{{ selectedBranchName() }}</p>
+                <p class="summary-card__meta">Link a branch when the department is branch-specific.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Lifecycle</p>
+                <h2 class="section-title">Record state</h2>
+              </div>
+            </div>
+
+            @if (isEditMode()) {
+              <label class="field-shell">
+                <span class="field-label">Status</span>
+                <div class="field-shell__select">
+                  <select class="field-select" name="status" [(ngModel)]="form.status">
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                  </select>
+                </div>
+              </label>
+            } @else {
+              <div class="section-note">
+                New departments are created as active records and can be adjusted later.
+              </div>
+            }
+          </section>
+        </aside>
+      </div>
+
+      <div class="form-actions">
+        <div class="form-actions__buttons">
+          @if (isEditMode()) {
+            <button type="submit" class="btn btn-warning" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Updating...</span>
+              } @else {
+                <app-lucide-icon name="save" [size]="16" />
+                <span>Update Department</span>
+              }
+            </button>
+          } @else {
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Creating...</span>
+              } @else {
+                <app-lucide-icon name="network" [size]="16" />
+                <span>Create Department</span>
+              }
+            </button>
+          }
+
+          <a routerLink="/org/departments" class="btn btn-secondary">
+            <app-lucide-icon name="x" [size]="16" />
+            <span>Cancel</span>
+          </a>
+        </div>
+
+        <div class="form-actions__feedback">
+          @if (successMessage) {
+            <div class="inline-note inline-note--success">
+              <app-lucide-icon name="checkCircle" [size]="16" />
+              <span>{{ successMessage }}</span>
+            </div>
+          }
+          @if (errorMessage) {
+            <div class="inline-note inline-note--danger">
+              <app-lucide-icon name="alertCircle" [size]="16" />
+              <span>{{ errorMessage }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  }
+</div>

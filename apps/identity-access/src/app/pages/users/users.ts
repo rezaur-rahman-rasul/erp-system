@@ -4,22 +4,34 @@ import {
   computed,
   inject,
   signal,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import {
   ListHeader,
   ListOverview,
   ListPagination,
   LucideIcon,
-} from "@hishab-nikash/shared-ui";
-import { IAMService } from "../../services/iam.service";
-import { User, UserStatus } from "@hishab-nikash/shared-models";
-import { RouterLink } from "@angular/router";
+} from '@hishab-nikash/shared-ui';
+import { User, UserStatus } from '@hishab-nikash/shared-models';
+import { IAMService } from '../../services/iam.service';
 
 type SortDirection = 'asc' | 'desc';
+type UserFilters = {
+  username: string;
+  displayName: string;
+  email: string;
+  role: string;
+  tenantId: string;
+  status: string;
+  createdBy: string;
+  createdAt: string;
+  lastUpdatedBy: string;
+  lastUpdatedAt: string;
+};
 
 @Component({
-  selector: "app-users",
+  selector: 'app-users',
   standalone: true,
   imports: [
     CommonModule,
@@ -29,29 +41,26 @@ type SortDirection = 'asc' | 'desc';
     ListPagination,
     LucideIcon,
   ],
-  templateUrl: "./users.html",
-  styleUrl: "./users.scss",
+  templateUrl: './users.html',
+  styleUrl: './users.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersComponent {
   private readonly iamService = inject(IAMService);
 
-  // Loading state – starts true until first data arrives
   readonly isLoading = signal(true);
-
-  // Raw data from service – initially empty
   readonly allUsers = signal<User[]>([]);
   readonly statusUpdatingUserId = signal<string | null>(null);
   readonly deletingUserId = signal<string | null>(null);
   readonly actionMessage = signal('');
   readonly actionError = signal('');
+  readonly guidanceItems = [
+    'Use filters and sorting to find the right account quickly.',
+    'Activate or deactivate accounts directly from the list.',
+    'Open a user to update profile details, roles, and organization access.',
+  ];
 
-  constructor() {
-    this.loadUsers();
-  }
-
-  // Filtering State
-  readonly filters = signal<Record<string, string>>({
+  readonly filters = signal<UserFilters>({
     username: '',
     displayName: '',
     email: '',
@@ -64,43 +73,74 @@ export class UsersComponent {
     lastUpdatedAt: '',
   });
 
-  // Sorting State
   readonly currentSort = signal<{ column: keyof User; direction: SortDirection } | null>({
     column: 'displayName',
-    direction: 'asc'
+    direction: 'asc',
   });
 
-  // Pagination State
   readonly currentPage = signal(1);
   readonly rowsPerPage = signal(10);
+  readonly skeletonRows = Array.from({ length: 8 });
 
-  // Reactive Logic: Filtering and Sorting (Client-side)
   readonly filteredUsers = computed(() => {
-    const f = this.filters();
+    const filterState = this.filters();
     const rows = this.allUsers().filter((user) => {
-      const rolesMatch = user.roles.some(r => r.name.toLowerCase().includes(f['role'].toLowerCase())) || f['role'] === '';
+      const rolesMatch =
+        user.roles.some((role) =>
+          role.name.toLowerCase().includes(filterState.role.toLowerCase())
+        ) || filterState.role === '';
+
       return (
-        user.username.toLowerCase().includes(f['username'].toLowerCase()) &&
-        user.displayName.toLowerCase().includes(f['displayName'].toLowerCase()) &&
-        user.email.toLowerCase().includes(f['email'].toLowerCase()) &&
+        user.username.toLowerCase().includes(filterState.username.toLowerCase()) &&
+        user.displayName
+          .toLowerCase()
+          .includes(filterState.displayName.toLowerCase()) &&
+        user.email.toLowerCase().includes(filterState.email.toLowerCase()) &&
         rolesMatch &&
-        user.tenantId.toLowerCase().includes(f['tenantId'].toLowerCase()) &&
-        user.status.toLowerCase().includes(f['status'].toLowerCase()) &&
-        (user.createdBy || '').toLowerCase().includes(f['createdBy'].toLowerCase()) &&
-        this.matchesDateFilter(user.createdAt, f['createdAt']) &&
-        (user.lastUpdatedBy || '').toLowerCase().includes(f['lastUpdatedBy'].toLowerCase()) &&
-        this.matchesDateFilter(user.lastUpdatedAt, f['lastUpdatedAt'])
+        user.tenantId.toLowerCase().includes(filterState.tenantId.toLowerCase()) &&
+        user.status.toLowerCase().includes(filterState.status.toLowerCase()) &&
+        (user.createdBy || '')
+          .toLowerCase()
+          .includes(filterState.createdBy.toLowerCase()) &&
+        this.matchesDateFilter(user.createdAt, filterState.createdAt) &&
+        (user.lastUpdatedBy || '')
+          .toLowerCase()
+          .includes(filterState.lastUpdatedBy.toLowerCase()) &&
+        this.matchesDateFilter(user.lastUpdatedAt, filterState.lastUpdatedAt)
       );
     });
 
     const sort = this.currentSort();
-    if (!sort) return rows;
-    return [...rows].sort((a, b) => this.compareRows(a, b, sort.column, sort.direction));
+
+    if (!sort) {
+      return rows;
+    }
+
+    return [...rows].sort((left, right) =>
+      this.compareRows(left, right, sort.column, sort.direction)
+    );
   });
 
   readonly totalUsersCount = computed(() => this.filteredUsers().length);
+  readonly activeUsersCount = computed(
+    () => this.allUsers().filter((user) => user.status === 'ACTIVE').length
+  );
+  readonly inactiveUsersCount = computed(
+    () => this.allUsers().filter((user) => user.status !== 'ACTIVE').length
+  );
+  readonly tenantCount = computed(
+    () => new Set(this.allUsers().map((user) => user.tenantId)).size
+  );
+  readonly usersWithAccessCount = computed(
+    () =>
+      this.allUsers().filter(
+        (user) => (user.organizationAccesses ?? []).length > 0
+      ).length
+  );
 
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalUsersCount() / this.rowsPerPage())));
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalUsersCount() / this.rowsPerPage()))
+  );
 
   readonly pagedUsers = computed(() => {
     const start = (this.currentPage() - 1) * this.rowsPerPage();
@@ -111,37 +151,55 @@ export class UsersComponent {
     const total = this.totalUsersCount();
     const rows = this.rowsPerPage();
     const page = this.currentPage();
-    if (total === 0) return { start: 0, end: 0, total: 0 };
+
+    if (total === 0) {
+      return { start: 0, end: 0, total: 0 };
+    }
+
     const start = (page - 1) * rows + 1;
     const end = Math.min(page * rows, total);
     return { start, end, total };
   });
 
-  // Skeleton rows for loading UI
-  readonly skeletonRows = Array.from({ length: 8 });
+  constructor() {
+    this.loadUsers();
+  }
 
   toggleSort(column: keyof User): void {
     const current = this.currentSort();
+
     if (current?.column === column) {
-      this.currentSort.set({ column, direction: current.direction === 'asc' ? 'desc' : 'asc' });
-    } else {
-      this.currentSort.set({ column, direction: 'asc' });
+      this.currentSort.set({
+        column,
+        direction: current.direction === 'asc' ? 'desc' : 'asc',
+      });
+      return;
     }
+
+    this.currentSort.set({ column, direction: 'asc' });
   }
 
   sortIcon(column: keyof User): string {
     const current = this.currentSort();
-    if (!current || current.column !== column) return '⇅';
-    return current.direction === 'asc' ? '↑' : '↓';
+
+    if (!current || current.column !== column) {
+      return '^v';
+    }
+
+    return current.direction === 'asc' ? '^' : 'v';
   }
 
   singleArrowSortIcon(column: keyof User): string {
     const current = this.currentSort();
-    if (!current || current.column !== column) return '↑';
-    return current.direction === 'asc' ? '↑' : '↓';
+
+    if (!current || current.column !== column) {
+      return '^';
+    }
+
+    return current.direction === 'asc' ? '^' : 'v';
   }
 
-  setFilter(key: string, value: string): void {
+  setFilter(key: keyof UserFilters, value: string): void {
     this.filters.update((state) => ({ ...state, [key]: value }));
     this.currentPage.set(1);
   }
@@ -152,6 +210,24 @@ export class UsersComponent {
 
   statusActionLabel(user: User): string {
     return user.status === 'ACTIVE' ? 'Deactivate' : 'Activate';
+  }
+
+  organizationAccessLabel(user: User): string {
+    const count = user.organizationAccesses?.length ?? 0;
+
+    if (count === 0) {
+      return 'None';
+    }
+
+    if (count === 1) {
+      return '1 assignment';
+    }
+
+    return `${count} assignments`;
+  }
+
+  hasPrimaryAccess(user: User): boolean {
+    return (user.organizationAccesses ?? []).some((access) => access.primaryAccess);
   }
 
   isStatusUpdating(userId: string): boolean {
@@ -168,32 +244,41 @@ export class UsersComponent {
   }
 
   nextPage(): void {
-    if (this.currentPage() < this.totalPages()) this.currentPage.update((p) => p + 1);
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.update((page) => page + 1);
+    }
   }
 
   prevPage(): void {
-    if (this.currentPage() > 1) this.currentPage.update((p) => p - 1);
+    if (this.currentPage() > 1) {
+      this.currentPage.update((page) => page - 1);
+    }
   }
 
   goToPage(page: number): void {
     this.currentPage.set(page);
   }
 
-  trackUser(index: number, user: User): string {
+  trackUser(_index: number, user: User): string {
     return user.id;
   }
 
-  /** Returns the 1-based serial number for a row, accounting for the current page */
   serialOf(index: number): number {
     return (this.currentPage() - 1) * this.rowsPerPage() + index + 1;
   }
 
-  /** Formats an ISO date string to a readable short format */
   formatDate(date?: string): string {
-    if (!date) return '—';
+    if (!date) {
+      return '--';
+    }
+
     return new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', hour12: false,
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
     }).format(new Date(date));
   }
 
@@ -214,18 +299,21 @@ export class UsersComponent {
         this.actionMessage.set(`User ${user.displayName} deleted successfully.`);
         this.deletingUserId.set(null);
       },
-      error: (err) => {
-        const status = err?.status;
-        const backendMessage = err?.error?.message || err?.error?.error || '';
+      error: (error) => {
+        const status = error?.status;
+        const backendMessage = error?.error?.message || error?.error?.error || '';
         const deleteNotSupported =
           typeof backendMessage === 'string' &&
-          backendMessage.toLowerCase().includes("request method 'delete' is not supported");
+          backendMessage
+            .toLowerCase()
+            .includes("request method 'delete' is not supported");
 
         if (status === 404 || status === 405 || deleteNotSupported) {
-          this.actionError.set('Delete endpoint is not available in backend yet.');
+          this.actionError.set('Delete is not available right now.');
         } else {
-          this.actionError.set(err?.error?.message || 'Failed to delete user.');
+          this.actionError.set(error?.error?.message || 'Failed to delete user.');
         }
+
         this.deletingUserId.set(null);
       },
     });
@@ -235,7 +323,11 @@ export class UsersComponent {
     const nextStatus = this.nextStatus(user.status);
     const actionLabel = nextStatus === 'ACTIVE' ? 'activate' : 'deactivate';
 
-    if (!window.confirm(`${actionLabel[0].toUpperCase()}${actionLabel.slice(1)} user ${user.displayName}?`)) {
+    if (
+      !window.confirm(
+        `${actionLabel[0].toUpperCase()}${actionLabel.slice(1)} user ${user.displayName}?`
+      )
+    ) {
       return;
     }
 
@@ -256,11 +348,15 @@ export class UsersComponent {
               : currentUser
           )
         );
-        this.actionMessage.set(`User ${user.displayName} ${nextStatus === 'ACTIVE' ? 'activated' : 'deactivated'} successfully.`);
+        this.actionMessage.set(
+          `User ${user.displayName} ${nextStatus === 'ACTIVE' ? 'activated' : 'deactivated'} successfully.`
+        );
         this.statusUpdatingUserId.set(null);
       },
-      error: (err) => {
-        this.actionError.set(err?.error?.message || 'Failed to update user status.');
+      error: (error) => {
+        this.actionError.set(
+          error?.error?.message || 'Failed to update user status.'
+        );
         this.statusUpdatingUserId.set(null);
       },
     });
@@ -272,11 +368,11 @@ export class UsersComponent {
 
     this.iamService.getUsers({ page: 1, limit: 1000 }).subscribe({
       next: (users) => {
-        this.allUsers.set(users);
+        this.allUsers.set(users.map((user) => this.normalizeUser(user)));
         this.isLoading.set(false);
       },
-      error: (err) => {
-        this.actionError.set(err?.error?.message || 'Failed to load users.');
+      error: (error) => {
+        this.actionError.set(error?.error?.message || 'Failed to load users.');
         this.isLoading.set(false);
       },
     });
@@ -287,15 +383,23 @@ export class UsersComponent {
   }
 
   private matchesDateFilter(date: string | undefined, filter: string): boolean {
-    if (!filter) return true;
+    if (!filter) {
+      return true;
+    }
+
     return this.toDateInputValue(date) === filter;
   }
 
   private toDateInputValue(date?: string): string {
-    if (!date) return '';
+    if (!date) {
+      return '';
+    }
 
     const parsedDate = new Date(date);
-    if (Number.isNaN(parsedDate.getTime())) return '';
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return '';
+    }
 
     const year = parsedDate.getFullYear();
     const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
@@ -304,18 +408,48 @@ export class UsersComponent {
     return `${year}-${month}-${day}`;
   }
 
-  private compareRows(a: User, b: User, column: keyof User, direction: SortDirection): number {
-    let valA: any = a[column];
-    let valB: any = b[column];
+  private compareRows(
+    left: User,
+    right: User,
+    column: keyof User,
+    direction: SortDirection
+  ): number {
+    let leftValue: string | number = left[column] as string | number;
+    let rightValue: string | number = right[column] as string | number;
+
     if (column === 'roles') {
-      valA = a.roles[0]?.name || '';
-      valB = b.roles[0]?.name || '';
+      leftValue = left.roles[0]?.name || '';
+      rightValue = right.roles[0]?.name || '';
     }
-    if (typeof valA === 'string' && typeof valB === 'string') {
-      return direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+
+    if (typeof leftValue === 'string' && typeof rightValue === 'string') {
+      return direction === 'asc'
+        ? leftValue.localeCompare(rightValue)
+        : rightValue.localeCompare(leftValue);
     }
-    if (valA < valB) return direction === 'asc' ? -1 : 1;
-    if (valA > valB) return direction === 'asc' ? 1 : -1;
+
+    if (leftValue < rightValue) {
+      return direction === 'asc' ? -1 : 1;
+    }
+
+    if (leftValue > rightValue) {
+      return direction === 'asc' ? 1 : -1;
+    }
+
     return 0;
+  }
+
+  private normalizeUser(user: User): User {
+    return {
+      ...user,
+      roles: Array.isArray(user.roles) ? user.roles : [],
+      organizationAccesses: Array.isArray(user.organizationAccesses)
+        ? user.organizationAccesses
+        : [],
+      createdBy: user.createdBy ?? '',
+      createdAt: user.createdAt ?? '',
+      lastUpdatedBy: user.lastUpdatedBy ?? '',
+      lastUpdatedAt: user.lastUpdatedAt ?? '',
+    };
   }
 }

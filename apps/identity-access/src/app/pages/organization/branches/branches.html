@@ -1,0 +1,216 @@
+<div class="organization-page page-shell">
+  <app-list-header
+    icon="mapPinned"
+    badge="Organization Setup"
+    title="Branches"
+    subtitle="Manage branch records, contact details, and operating locations."
+    actionText="Create Branch"
+    actionRoute="/org/branches/create"
+  ></app-list-header>
+
+  <app-list-overview
+    icon="layoutDashboard"
+    title="Branch overview"
+    subtitle="Review active locations, linked business units, and branch contact coverage."
+    metricLabel="Visible Branches"
+    [metricValue]="totalBranchesCount()"
+    guidanceTitle="Quick notes"
+    [guidanceItems]="guidanceItems"
+  ></app-list-overview>
+
+  <section class="table-shell">
+    <div class="table-shell-header">
+      <div>
+        <h2 class="table-shell-title">Branch list</h2>
+        <p class="table-shell-subtitle">
+          Keep location, timezone, and contact details current so operations teams
+          can rely on this list.
+        </p>
+      </div>
+
+      <div class="records-toolbar">
+        <div class="records-toolbar__chips">
+          <span class="records-toolbar__chip">{{ activeBranchesCount() }} active</span>
+          <span class="records-toolbar__chip">{{ mappedUnitCount() }} linked to units</span>
+          <span class="records-toolbar__chip">{{ cityCount() }} cities</span>
+        </div>
+
+        @if (loadError()) {
+          <div class="records-feedback records-feedback--danger">
+            {{ loadError() }}
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th class="text-center" style="width: 56px">Sl.</th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('code')">
+                <span>Code</span>
+                <span class="sort-icon">{{ sortIcon('code') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('name')">
+                <span>Branch</span>
+                <span class="sort-icon">{{ singleArrowSortIcon('name') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('legalEntity')">
+                <span>Legal Entity</span>
+                <span class="sort-icon">{{ sortIcon('legalEntity') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('businessUnit')">
+                <span>Business Unit</span>
+                <span class="sort-icon">{{ sortIcon('businessUnit') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('city')">
+                <span>Location</span>
+                <span class="sort-icon">{{ sortIcon('city') }}</span>
+              </button>
+            </th>
+            <th>
+              <span class="th-btn cursor-default hover:bg-transparent">
+                <span>Contact</span>
+              </span>
+            </th>
+            <th class="text-center">
+              <button
+                type="button"
+                class="th-btn th-btn-center"
+                (click)="toggleSort('status')"
+              >
+                <span>Status</span>
+                <span class="sort-icon">{{ sortIcon('status') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('lastUpdatedAt')">
+                <span>Updated</span>
+                <span class="sort-icon">{{ sortIcon('lastUpdatedAt') }}</span>
+              </button>
+            </th>
+            <th class="text-center">Actions</th>
+          </tr>
+
+          <tr class="filter-row">
+            <th></th>
+            <th><input class="filter-input" type="text" placeholder="Filter code" [value]="filters().code" (input)="setFilter('code', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="text" placeholder="Filter branch" [value]="filters().name" (input)="setFilter('name', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="text" placeholder="Filter entity" [value]="filters().legalEntity" (input)="setFilter('legalEntity', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="text" placeholder="Filter unit" [value]="filters().businessUnit" (input)="setFilter('businessUnit', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="text" placeholder="Filter city" [value]="filters().city" (input)="setFilter('city', $any($event.target).value)" /></th>
+            <th></th>
+            <th><input class="filter-input" type="text" placeholder="Status" [value]="filters().status" (input)="setFilter('status', $any($event.target).value)" /></th>
+            <th><input class="filter-input" type="date" [value]="filters().updatedAt" (input)="setFilter('updatedAt', $any($event.target).value)" /></th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody [class.data-rows-container]="!isLoading()">
+          @if (isLoading()) {
+            @for (row of skeletonRows; track $index) {
+              <tr class="skeleton-row">
+                <td><div class="skeleton-cell w-8 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 52%"></div></td>
+                <td><div class="skeleton-cell" style="width: 70%"></div></td>
+                <td><div class="skeleton-cell" style="width: 80%"></div></td>
+                <td><div class="skeleton-cell" style="width: 72%"></div></td>
+                <td><div class="skeleton-cell" style="width: 54%"></div></td>
+                <td><div class="skeleton-cell" style="width: 78%"></div></td>
+                <td><div class="skeleton-cell w-24 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 68%"></div></td>
+                <td><div class="skeleton-cell w-16 mx-auto"></div></td>
+              </tr>
+            }
+          }
+
+          @if (!isLoading() && pagedBranches().length === 0) {
+            <tr>
+              <td colspan="10" class="empty-row-cell">
+                <div class="empty-state-inline">
+                  <div class="empty-icon">
+                    <app-lucide-icon name="mapPinned" [size]="28" />
+                  </div>
+                  <h3 class="empty-title">No branches matched the current filters</h3>
+                  <p class="empty-subtitle">
+                    Adjust the filters or create a new branch.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (!isLoading()) {
+            @for (branch of pagedBranches(); track trackBranch($index, branch); let i = $index) {
+              <tr class="data-row">
+                <td class="records-serial">{{ serialOf(i) }}</td>
+                <td>
+                  <a class="order-link" [routerLink]="['/org/branches', branch.id, 'edit']">
+                    <span>{{ branch.code }}</span>
+                    <app-lucide-icon name="sparkles" [size]="14" />
+                  </a>
+                </td>
+                <td>
+                  <div class="records-primary">
+                    <span class="records-primary__title">{{ branch.name }}</span>
+                    <span class="records-primary__meta">{{ branch.timezone || 'Timezone not set' }}</span>
+                  </div>
+                </td>
+                <td class="records-muted">{{ legalEntityName(branch.legalEntityId) }}</td>
+                <td class="records-muted">{{ businessUnitName(branch.businessUnitId) }}</td>
+                <td>
+                  <div class="records-stack">
+                    <span class="records-muted">{{ branch.city || 'City not set' }}</span>
+                    <span class="records-code">{{ branch.countryCode || 'Country not set' }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="records-stack">
+                    <span class="records-muted">{{ branch.email || 'Email not set' }}</span>
+                    <span class="records-code">{{ branch.phone || 'Phone not set' }}</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <span class="status-badge" [class]="statusClass(branch.status)">
+                    {{ branch.status }}
+                  </span>
+                </td>
+                <td class="records-muted">{{ formatDate(branch.lastUpdatedAt || branch.createdAt) }}</td>
+                <td>
+                  <div class="action-group">
+                    <a [routerLink]="['/org/branches', branch.id, 'edit']" class="action-btn action-amber">
+                      Edit
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isLoading()) {
+      <app-list-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [rowsPerPage]="rowsPerPage()"
+        [pageInfo]="pageInfo()"
+        (rowsPerPageChange)="setRowsPerPage($event)"
+        (prevPage)="prevPage()"
+        (nextPage)="nextPage()"
+        (goToPage)="goToPage($event)"
+      ></app-list-pagination>
+    }
+  </section>
+</div>

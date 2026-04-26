@@ -1,5 +1,6 @@
 const { createGlobPatternsForDependencies } = require('@nx/angular/tailwind');
 const { join } = require('path');
+const defaultTheme = require('tailwindcss/defaultTheme');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -10,7 +11,39 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          '"Segoe UI Variable"',
+          '"Trebuchet MS"',
+          ...defaultTheme.fontFamily.sans,
+        ],
+      },
       colors: {
+        brand: {
+          50: '#eef7f5',
+          100: '#d8ebe7',
+          200: '#b4d8d1',
+          300: '#89bdb3',
+          400: '#5a9d92',
+          500: '#3c857b',
+          600: '#2f6c64',
+          700: '#285652',
+          800: '#244541',
+          900: '#203936',
+          950: '#102222',
+        },
+        sand: {
+          50: '#faf7f2',
+          100: '#f4eee3',
+          200: '#e8dcc8',
+          300: '#dac3a2',
+          400: '#c8a179',
+          500: '#b88556',
+          600: '#a36f47',
+          700: '#85573b',
+          800: '#6c4733',
+          900: '#593c2d',
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
@@ -33,10 +66,12 @@ module.exports = {
       },
       boxShadow: {
         'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+        'panel': '0 24px 70px -46px rgba(15, 23, 42, 0.45)',
       },
       borderRadius: {
         'xl': '1rem',
         '2xl': '1.5rem',
+        '3xl': '1.9rem',
       }
     },
   },

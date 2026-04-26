@@ -1,10 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormHeader, LucideIcon } from '@hishab-nikash/shared-ui';
 import {
   CreateRoleRequest,
+  PermissionDefinition,
   Role,
   UpdateRoleRequest,
 } from '@hishab-nikash/shared-models';
@@ -33,6 +40,18 @@ export class RoleFormComponent {
   readonly isEditMode = signal(false);
   readonly isLoadingRole = signal(false);
   readonly permissions = signal<string[]>([]);
+  readonly permissionCatalog = signal<PermissionDefinition[]>([]);
+  readonly isLoadingCatalog = signal(true);
+
+  readonly catalogSuggestions = computed(() =>
+    this.permissionCatalog()
+      .filter((permission) => !this.permissions().includes(permission.code))
+      .slice(0, 10)
+  );
+
+  readonly serviceCount = computed(
+    () => new Set(this.permissionCatalog().map((permission) => permission.service)).size
+  );
 
   form: RoleFormValue = {
     code: '',
@@ -46,6 +65,8 @@ export class RoleFormComponent {
   errorMessage = '';
 
   constructor() {
+    this.loadPermissionCatalog();
+
     const roleId = this.route.snapshot.paramMap.get('id');
 
     if (!roleId) {
@@ -55,21 +76,7 @@ export class RoleFormComponent {
     this.editRoleId.set(roleId);
     this.isEditMode.set(true);
     this.isLoadingRole.set(true);
-
-    this.iamService.getRoleById(roleId).subscribe({
-      next: (role) => {
-        const normalizedRole = this.normalizeRole(role);
-        this.form.code = normalizedRole.code;
-        this.form.name = normalizedRole.name;
-        this.form.description = normalizedRole.description;
-        this.permissions.set(normalizedRole.permissions);
-        this.isLoadingRole.set(false);
-      },
-      error: (err) => {
-        this.errorMessage = err?.error?.message || 'Could not load role data.';
-        this.isLoadingRole.set(false);
-      },
-    });
+    this.loadRole(roleId);
   }
 
   get hasPermissions(): boolean {
@@ -99,6 +106,7 @@ export class RoleFormComponent {
 
     if (this.isEditMode()) {
       const roleId = this.editRoleId();
+
       if (!roleId) {
         this.errorMessage = 'Missing role id for update.';
         this.isSubmitting = false;
@@ -107,12 +115,12 @@ export class RoleFormComponent {
 
       this.iamService.updateRole(roleId, payload).subscribe({
         next: () => {
-          this.successMessage = 'Role updated successfully!';
+          this.successMessage = 'Role updated successfully.';
           this.isSubmitting = false;
           setTimeout(() => this.router.navigate(['/iam/roles']), 1200);
         },
-        error: (err) => {
-          this.errorMessage = err?.error?.message || 'Failed to update role.';
+        error: (error) => {
+          this.errorMessage = error?.error?.message || 'Failed to update role.';
           this.isSubmitting = false;
         },
       });
@@ -122,12 +130,12 @@ export class RoleFormComponent {
 
     this.iamService.createRole(payload).subscribe({
       next: () => {
-        this.successMessage = 'Role created successfully!';
+        this.successMessage = 'Role created successfully.';
         this.isSubmitting = false;
         setTimeout(() => this.router.navigate(['/iam/roles']), 1200);
       },
-      error: (err) => {
-        this.errorMessage = err?.error?.message || 'Failed to create role.';
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'Failed to create role.';
         this.isSubmitting = false;
       },
     });
@@ -146,6 +154,14 @@ export class RoleFormComponent {
     this.permissions.set(Array.from(nextPermissions));
   }
 
+  addCatalogPermission(permissionCode: string): void {
+    if (this.permissions().includes(permissionCode)) {
+      return;
+    }
+
+    this.permissions.set([...this.permissions(), permissionCode]);
+  }
+
   removePermission(permission: string): void {
     this.permissions.set(
       this.permissions().filter((currentPermission) => currentPermission !== permission)
@@ -161,15 +177,47 @@ export class RoleFormComponent {
 
   onPermissionPaste(event: ClipboardEvent): void {
     const pastedText = event.clipboardData?.getData('text') ?? '';
+
     if (!pastedText.includes(',') && !pastedText.includes('\n')) {
       return;
     }
 
     event.preventDefault();
     const nextPermissions = new Set(this.permissions());
-    this.extractPermissionTokens(pastedText).forEach((permission) => nextPermissions.add(permission));
+    this.extractPermissionTokens(pastedText).forEach((permission) =>
+      nextPermissions.add(permission)
+    );
     this.permissions.set(Array.from(nextPermissions));
     this.permissionInput = '';
+  }
+
+  private loadRole(roleId: string): void {
+    this.iamService.getRoleById(roleId).subscribe({
+      next: (role) => {
+        const normalizedRole = this.normalizeRole(role);
+        this.form.code = normalizedRole.code;
+        this.form.name = normalizedRole.name;
+        this.form.description = normalizedRole.description;
+        this.permissions.set(normalizedRole.permissions);
+        this.isLoadingRole.set(false);
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.message || 'Could not load role data.';
+        this.isLoadingRole.set(false);
+      },
+    });
+  }
+
+  private loadPermissionCatalog(): void {
+    this.iamService.getPermissionDefinitions().subscribe({
+      next: (catalog) => {
+        this.permissionCatalog.set(catalog);
+        this.isLoadingCatalog.set(false);
+      },
+      error: () => {
+        this.isLoadingCatalog.set(false);
+      },
+    });
   }
 
   private buildPayload(): CreateRoleRequest | UpdateRoleRequest {

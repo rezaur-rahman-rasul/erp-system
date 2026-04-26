@@ -1,35 +1,48 @@
 <div class="orders-page">
   <app-list-header
     icon="users"
-    badge="Identity Management"
-    title="Users List"
-    subtitle="Manage identity access, roles, and tenant associations efficiently."
+    badge="User Management"
+    title="Users"
+    subtitle="Manage accounts, role assignments, tenant details, and organization access."
     actionText="Create User"
     actionRoute="/iam/users/create"
   ></app-list-header>
 
   <app-list-overview
     icon="layoutDashboard"
-    title="Users Overview"
-    subtitle="Track all application users, their roles, and status."
-    metricLabel="Total Users"
+    title="User overview"
+    subtitle="Review account status, assigned roles, and organization access in one place."
+    metricLabel="Visible Users"
     [metricValue]="totalUsersCount()"
+    guidanceTitle="Quick notes"
+    [guidanceItems]="guidanceItems"
   ></app-list-overview>
 
   <section class="table-shell">
     <div class="table-shell-header">
       <div>
-        <h2 class="table-shell-title">All Users</h2>
-        <p class="table-shell-subtitle">User records and actions</p>
+        <h2 class="table-shell-title">Users list</h2>
+        <p class="table-shell-subtitle">
+          Review account records, status, tenant assignments, and organization access.
+        </p>
       </div>
-      <div class="flex flex-wrap items-center justify-end gap-2">
+
+      <div class="records-toolbar">
+        <div class="records-toolbar__chips">
+          <span class="records-toolbar__chip">{{ activeUsersCount() }} active</span>
+          <span class="records-toolbar__chip">{{ inactiveUsersCount() }} inactive</span>
+          <span class="records-toolbar__chip">{{ tenantCount() }} tenant(s)</span>
+          <span class="records-toolbar__chip">{{ usersWithAccessCount() }} with org access</span>
+        </div>
+
         @if (actionMessage()) {
-          <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+          <div class="records-feedback records-feedback--success">
             {{ actionMessage() }}
           </div>
         }
+
         @if (actionError()) {
-          <div class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
+          <div class="records-feedback records-feedback--danger">
             {{ actionError() }}
           </div>
         }
@@ -39,59 +52,39 @@
     <div class="table-scroll">
       <table class="orders-table">
         <thead>
-          <!-- Column Headers -->
           <tr>
-            <th style="width: 50px" class="text-center">Sl.</th>
+            <th class="text-center" style="width: 56px">Sl.</th>
             <th>
-              <button
-                type="button"
-                class="th-btn"
-                (click)="toggleSort('username')"
-              >
+              <button type="button" class="th-btn" (click)="toggleSort('username')">
                 <span>Username</span>
                 <span class="sort-icon">{{ sortIcon('username') }}</span>
               </button>
             </th>
             <th>
-              <button
-                type="button"
-                class="th-btn"
-                (click)="toggleSort('displayName')"
-              >
+              <button type="button" class="th-btn" (click)="toggleSort('displayName')">
                 <span>Display Name</span>
                 <span class="sort-icon">{{ singleArrowSortIcon('displayName') }}</span>
               </button>
             </th>
             <th>
-              <button
-                type="button"
-                class="th-btn"
-                (click)="toggleSort('email')"
-              >
+              <button type="button" class="th-btn" (click)="toggleSort('email')">
                 <span>Email</span>
                 <span class="sort-icon">{{ sortIcon('email') }}</span>
               </button>
             </th>
             <th>
-              <button
-                type="button"
-                class="th-btn"
-                (click)="toggleSort('roles')"
-              >
+              <button type="button" class="th-btn" (click)="toggleSort('roles')">
                 <span>Roles</span>
                 <span class="sort-icon">{{ sortIcon('roles') }}</span>
               </button>
             </th>
             <th>
-              <button
-                type="button"
-                class="th-btn"
-                (click)="toggleSort('tenantId')"
-              >
+              <button type="button" class="th-btn" (click)="toggleSort('tenantId')">
                 <span>Tenant</span>
                 <span class="sort-icon">{{ sortIcon('tenantId') }}</span>
               </button>
             </th>
+            <th>Org Access</th>
             <th class="text-center">
               <button
                 type="button"
@@ -103,41 +96,25 @@
               </button>
             </th>
             <th>
-              <button
-                type="button"
-                class="th-btn"
-                (click)="toggleSort('createdBy')"
-              >
+              <button type="button" class="th-btn" (click)="toggleSort('createdBy')">
                 <span>Created By</span>
                 <span class="sort-icon">{{ sortIcon('createdBy') }}</span>
               </button>
             </th>
             <th>
-              <button
-                type="button"
-                class="th-btn"
-                (click)="toggleSort('createdAt')"
-              >
+              <button type="button" class="th-btn" (click)="toggleSort('createdAt')">
                 <span>Created At</span>
                 <span class="sort-icon">{{ sortIcon('createdAt') }}</span>
               </button>
             </th>
             <th>
-              <button
-                type="button"
-                class="th-btn"
-                (click)="toggleSort('lastUpdatedBy')"
-              >
+              <button type="button" class="th-btn" (click)="toggleSort('lastUpdatedBy')">
                 <span>Updated By</span>
                 <span class="sort-icon">{{ sortIcon('lastUpdatedBy') }}</span>
               </button>
             </th>
             <th>
-              <button
-                type="button"
-                class="th-btn"
-                (click)="toggleSort('lastUpdatedAt')"
-              >
+              <button type="button" class="th-btn" (click)="toggleSort('lastUpdatedAt')">
                 <span>Last Updated</span>
                 <span class="sort-icon">{{ sortIcon('lastUpdatedAt') }}</span>
               </button>
@@ -145,16 +122,14 @@
             <th class="text-center">Actions</th>
           </tr>
 
-          <!-- Filter Row -->
           <tr class="filter-row">
             <th></th>
-            <!-- Sl. — no filter -->
             <th>
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Username"
-                [value]="filters()['username']"
+                placeholder="Filter username"
+                [value]="filters().username"
                 (input)="setFilter('username', $any($event.target).value)"
               />
             </th>
@@ -162,8 +137,8 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Name"
-                [value]="filters()['displayName']"
+                placeholder="Filter display name"
+                [value]="filters().displayName"
                 (input)="setFilter('displayName', $any($event.target).value)"
               />
             </th>
@@ -171,8 +146,8 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Email"
-                [value]="filters()['email']"
+                placeholder="Filter email"
+                [value]="filters().email"
                 (input)="setFilter('email', $any($event.target).value)"
               />
             </th>
@@ -180,8 +155,8 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Role"
-                [value]="filters()['role']"
+                placeholder="Filter role"
+                [value]="filters().role"
                 (input)="setFilter('role', $any($event.target).value)"
               />
             </th>
@@ -189,17 +164,18 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Tenant"
-                [value]="filters()['tenantId']"
+                placeholder="Filter tenant"
+                [value]="filters().tenantId"
                 (input)="setFilter('tenantId', $any($event.target).value)"
               />
             </th>
+            <th></th>
             <th>
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Status"
-                [value]="filters()['status']"
+                placeholder="Filter status"
+                [value]="filters().status"
                 (input)="setFilter('status', $any($event.target).value)"
               />
             </th>
@@ -207,8 +183,8 @@
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Creator"
-                [value]="filters()['createdBy']"
+                placeholder="Filter creator"
+                [value]="filters().createdBy"
                 (input)="setFilter('createdBy', $any($event.target).value)"
               />
             </th>
@@ -216,17 +192,16 @@
               <input
                 class="filter-input"
                 type="date"
-                [value]="filters()['createdAt']"
+                [value]="filters().createdAt"
                 (input)="setFilter('createdAt', $any($event.target).value)"
               />
             </th>
-            <!-- Created At — date, no text filter -->
             <th>
               <input
                 class="filter-input"
                 type="text"
-                placeholder="Filter Updater"
-                [value]="filters()['lastUpdatedBy']"
+                placeholder="Filter updater"
+                [value]="filters().lastUpdatedBy"
                 (input)="setFilter('lastUpdatedBy', $any($event.target).value)"
               />
             </th>
@@ -234,171 +209,172 @@
               <input
                 class="filter-input"
                 type="date"
-                [value]="filters()['lastUpdatedAt']"
+                [value]="filters().lastUpdatedAt"
                 (input)="setFilter('lastUpdatedAt', $any($event.target).value)"
               />
             </th>
-            <!-- Updated At — date, no text filter -->
             <th></th>
-            <!-- Actions -->
           </tr>
         </thead>
 
-        <!-- Single tbody — skeleton or data -->
         <tbody [class.data-rows-container]="!isLoading()">
-          <!-- SKELETON ROWS -->
-          @if (isLoading()) { @for (row of skeletonRows; track $index) {
-          <tr class="skeleton-row">
-            <td><div class="skeleton-cell w-8 mx-auto"></div></td>
-            <td><div class="skeleton-cell" style="width: 70%"></div></td>
-            <td><div class="skeleton-cell" style="width: 75%"></div></td>
-            <td><div class="skeleton-cell" style="width: 80%"></div></td>
-            <td><div class="skeleton-cell" style="width: 55%"></div></td>
-            <td><div class="skeleton-cell" style="width: 60%"></div></td>
-            <td><div class="skeleton-cell w-16 mx-auto"></div></td>
-            <td><div class="skeleton-cell" style="width: 65%"></div></td>
-            <td><div class="skeleton-cell" style="width: 70%"></div></td>
-            <td><div class="skeleton-cell" style="width: 65%"></div></td>
-            <td><div class="skeleton-cell" style="width: 70%"></div></td>
-            <td>
-              <div class="flex justify-center gap-2">
-                <div class="skeleton-cell w-12"></div>
-                <div class="skeleton-cell w-14"></div>
-              </div>
-            </td>
-          </tr>
-          } }
-
-          <!-- EMPTY STATE -->
-          @if (!isLoading() && pagedUsers().length === 0) {
-          <tr>
-            <td colspan="12" class="empty-row-cell">
-              <div class="empty-state-inline">
-                <div class="empty-icon">
-                  <app-lucide-icon name="users" [size]="28" />
-                </div>
-                <h3 class="empty-title">No users found</h3>
-                <p class="empty-subtitle">
-                  Try changing your filters or create a new user.
-                </p>
-              </div>
-            </td>
-          </tr>
+          @if (isLoading()) {
+            @for (row of skeletonRows; track $index) {
+              <tr class="skeleton-row">
+                <td><div class="skeleton-cell w-8 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 70%"></div></td>
+                <td><div class="skeleton-cell" style="width: 75%"></div></td>
+                <td><div class="skeleton-cell" style="width: 80%"></div></td>
+                <td><div class="skeleton-cell" style="width: 55%"></div></td>
+                <td><div class="skeleton-cell" style="width: 60%"></div></td>
+                <td><div class="skeleton-cell w-20"></div></td>
+                <td><div class="skeleton-cell w-16 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 65%"></div></td>
+                <td><div class="skeleton-cell" style="width: 70%"></div></td>
+                <td><div class="skeleton-cell" style="width: 65%"></div></td>
+                <td><div class="skeleton-cell" style="width: 70%"></div></td>
+                <td>
+                  <div class="flex justify-center gap-2">
+                    <div class="skeleton-cell w-12"></div>
+                    <div class="skeleton-cell w-14"></div>
+                  </div>
+                </td>
+              </tr>
+            }
           }
 
-          <!-- DATA ROWS -->
-          @if (!isLoading()) { @for (user of pagedUsers(); track
-          trackUser($index, user); let i = $index) {
-          <tr class="data-row">
-            <!-- Sl. — sequential number -->
-            <td
-              class="text-center text-slate-500 text-xs font-semibold tabular-nums"
-            >
-              {{ serialOf(i) }}
-            </td>
+          @if (!isLoading() && pagedUsers().length === 0) {
+            <tr>
+              <td colspan="13" class="empty-row-cell">
+                <div class="empty-state-inline">
+                  <div class="empty-icon">
+                    <app-lucide-icon name="users" [size]="28" />
+                  </div>
+                  <h3 class="empty-title">No users matched the current filters</h3>
+                  <p class="empty-subtitle">
+                    Adjust the filters or create a new account.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
 
-            <!-- Username — hyperlinked to edit -->
+          @if (!isLoading()) {
+            @for (user of pagedUsers(); track trackUser($index, user); let i = $index) {
+              <tr class="data-row">
+                <td class="records-serial">{{ serialOf(i) }}</td>
 
-            <td>
-              <a
-                class="order-link"
-                [routerLink]="['/iam/users', user.id, 'edit']"
-                title="Click to edit"
-              >
-                <span>{{ user.username}}</span>
-                <app-lucide-icon name="sparkles" [size]="14" />
-              </a>
-            </td>
+                <td>
+                  <a
+                    class="order-link"
+                    [routerLink]="['/iam/users', user.id, 'edit']"
+                    title="Edit user"
+                  >
+                    <span>{{ user.username }}</span>
+                    <app-lucide-icon name="sparkles" [size]="14" />
+                  </a>
+                </td>
 
-            <td class="font-bold text-slate-800">{{ user.displayName }}</td>
-            <td>
-              <span class="cell-ellipsis" [title]="user.email">{{ user.email }}</span>
-            </td>
+                <td>
+                  <div class="records-primary">
+                    <span class="records-primary__title">{{ user.displayName }}</span>
+                  </div>
+                </td>
 
-            <td>
-              <div class="flex flex-wrap gap-1">
-                @for (role of user.roles; track role.id) {
-                <span
-                  class="status-badge"
-                  [class]="role.code === 'PLATFORM_ADMIN' ? 'status-completed' : 'status-new'"
-                >
-                  {{ role.name }}
-                </span>
-                }
-              </div>
-            </td>
+                <td>
+                  <span class="cell-ellipsis" [title]="user.email">{{ user.email }}</span>
+                </td>
 
-            <td class="font-mono text-xs">{{ user.tenantId }}</td>
+                <td>
+                  <div class="records-tags">
+                    @for (role of user.roles; track role.id) {
+                      <span
+                        class="status-badge"
+                        [class]="role.code === 'PLATFORM_ADMIN' ? 'status-completed' : 'status-default'"
+                      >
+                        {{ role.name }}
+                      </span>
+                    }
+                  </div>
+                </td>
 
-            <td class="text-center">
-              <span class="status-badge" [class]="statusClass(user.status)"
-                >{{ user.status }}</span
-              >
-            </td>
+                <td class="records-code">{{ user.tenantId }}</td>
 
-            <!-- Audit columns -->
-            <td class="text-xs text-slate-500">{{ user.createdBy || '—' }}</td>
-            <td class="text-xs text-slate-400 whitespace-nowrap">
-              {{ formatDate(user.createdAt) }}
-            </td>
-            <td class="text-xs text-slate-500">
-              {{ user.lastUpdatedBy || '—' }}
-            </td>
-            <td class="text-xs text-slate-400 whitespace-nowrap">
-              {{ formatDate(user.lastUpdatedAt) }}
-            </td>
+                <td>
+                  <div class="records-access">
+                    <span class="status-badge status-default">
+                      {{ organizationAccessLabel(user) }}
+                    </span>
+                    @if (hasPrimaryAccess(user)) {
+                      <span class="status-badge status-progress">Primary</span>
+                    }
+                  </div>
+                </td>
 
-            <td>
-              <div class="action-group">
-                <button
-                  type="button"
-                  class="action-btn"
-                  [class.action-amber]="user.status === 'ACTIVE'"
-                  [class.action-emerald]="user.status !== 'ACTIVE'"
-                  [class.cursor-not-allowed]="isStatusUpdating(user.id)"
-                  [class.opacity-60]="isStatusUpdating(user.id)"
-                  [disabled]="isStatusUpdating(user.id)"
-                  (click)="toggleUserStatus(user)"
-                >
-                  @if (isStatusUpdating(user.id)) {
-                    Saving...
-                  } @else {
-                    {{ statusActionLabel(user) }}
-                  }
-                </button>
-                <button
-                  type="button"
-                  class="action-btn action-rose"
-                  [class.cursor-not-allowed]="isDeleting(user.id)"
-                  [class.opacity-60]="isDeleting(user.id)"
-                  [disabled]="isDeleting(user.id)"
-                  (click)="onDelete(user)"
-                >
-                  @if (isDeleting(user.id)) {
-                    Deleting...
-                  } @else {
-                    Delete
-                  }
-                </button>
-              </div>
-            </td>
-          </tr>
-          } }
+                <td class="text-center">
+                  <span class="status-badge" [class]="statusClass(user.status)">
+                    {{ user.status }}
+                  </span>
+                </td>
+
+                <td class="records-muted">{{ user.createdBy || '--' }}</td>
+                <td class="records-muted">{{ formatDate(user.createdAt) }}</td>
+                <td class="records-muted">{{ user.lastUpdatedBy || '--' }}</td>
+                <td class="records-muted">{{ formatDate(user.lastUpdatedAt) }}</td>
+
+                <td>
+                  <div class="action-group">
+                    <button
+                      type="button"
+                      class="action-btn"
+                      [class.action-amber]="user.status === 'ACTIVE'"
+                      [class.action-emerald]="user.status !== 'ACTIVE'"
+                      [class.cursor-not-allowed]="isStatusUpdating(user.id)"
+                      [class.opacity-60]="isStatusUpdating(user.id)"
+                      [disabled]="isStatusUpdating(user.id)"
+                      (click)="toggleUserStatus(user)"
+                    >
+                      @if (isStatusUpdating(user.id)) {
+                        Saving...
+                      } @else {
+                        {{ statusActionLabel(user) }}
+                      }
+                    </button>
+
+                    <button
+                      type="button"
+                      class="action-btn action-rose"
+                      [class.cursor-not-allowed]="isDeleting(user.id)"
+                      [class.opacity-60]="isDeleting(user.id)"
+                      [disabled]="isDeleting(user.id)"
+                      (click)="onDelete(user)"
+                    >
+                      @if (isDeleting(user.id)) {
+                        Deleting...
+                      } @else {
+                        Delete
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
         </tbody>
       </table>
     </div>
 
     @if (!isLoading()) {
-    <app-list-pagination
-      [currentPage]="currentPage()"
-      [totalPages]="totalPages()"
-      [rowsPerPage]="rowsPerPage()"
-      [pageInfo]="pageInfo()"
-      (rowsPerPageChange)="setRowsPerPage($event)"
-      (prevPage)="prevPage()"
-      (nextPage)="nextPage()"
-      (goToPage)="goToPage($event)"
-    ></app-list-pagination>
+      <app-list-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [rowsPerPage]="rowsPerPage()"
+        [pageInfo]="pageInfo()"
+        (rowsPerPageChange)="setRowsPerPage($event)"
+        (prevPage)="prevPage()"
+        (nextPage)="nextPage()"
+        (goToPage)="goToPage($event)"
+      ></app-list-pagination>
     }
   </section>
 </div>

@@ -1,0 +1,265 @@
+<div class="form-page page-shell">
+  @if (isEditMode()) {
+    <app-form-header
+      icon="pencil"
+      badge="Organization Setup"
+      title="Edit Business Unit"
+      subtitle="Update the unit name, owner, description, and record status."
+      actionText="Back to Business Units"
+      actionRoute="/org/business-units"
+    ></app-form-header>
+  } @else {
+    <app-form-header
+      icon="briefcaseBusiness"
+      badge="Organization Setup"
+      title="Create Business Unit"
+      subtitle="Add a business unit under the correct legal entity before linking branches."
+      actionText="Back to Business Units"
+      actionRoute="/org/business-units"
+    ></app-form-header>
+  }
+
+  @if (isLoadingUnit() || isLoadingOptions()) {
+    <div class="loading-state surface-card">
+      <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+      <span>Loading business unit data...</span>
+    </div>
+  } @else {
+    <form #unitForm="ngForm" (ngSubmit)="saveUnit(unitForm)" novalidate class="form-stack">
+      <div class="form-layout">
+        <div class="form-main">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Core details</p>
+                <h2 class="section-title">Business unit profile</h2>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field-shell">
+                <span class="field-label">Legal entity <span class="required-star">*</span></span>
+                <div class="field-shell__select">
+                  <select
+                    class="field-select"
+                    name="legalEntityId"
+                    [(ngModel)]="form.legalEntityId"
+                    required
+                    [disabled]="isEditMode()"
+                  >
+                    <option value="">Select legal entity</option>
+                    @for (entity of legalEntities(); track entity.id) {
+                      <option [value]="entity.id">{{ entity.legalName }}</option>
+                    }
+                  </select>
+                </div>
+              </label>
+
+              <label class="field-shell">
+                <span class="field-label">Code <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="hash" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="code"
+                    [(ngModel)]="form.code"
+                    required
+                    maxlength="40"
+                    [readonly]="isEditMode()"
+                    placeholder="e.g. RETAIL"
+                    #codeCtrl="ngModel"
+                  />
+                </div>
+                @if (codeCtrl.invalid && codeCtrl.touched) {
+                  <span class="field-error">Code is required.</span>
+                }
+              </label>
+
+              <label class="field-shell form-grid__full">
+                <span class="field-label">Unit name <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="briefcaseBusiness" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="name"
+                    [(ngModel)]="form.name"
+                    required
+                    maxlength="160"
+                    placeholder="e.g. Retail Operations"
+                    #nameCtrl="ngModel"
+                  />
+                </div>
+                @if (nameCtrl.invalid && nameCtrl.touched) {
+                  <span class="field-error">Unit name is required.</span>
+                }
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Ownership</p>
+                <h2 class="section-title">Manager and description</h2>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field-shell">
+                <span class="field-label">Manager employee id</span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="userRound" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="managerEmployeeId"
+                    [(ngModel)]="form.managerEmployeeId"
+                    maxlength="80"
+                    placeholder="Employee id or staff code"
+                  />
+                </div>
+              </label>
+            </div>
+
+            <label class="field-shell mt-5">
+              <span class="field-label">Description</span>
+              <textarea
+                class="field-textarea"
+                name="description"
+                [(ngModel)]="form.description"
+                maxlength="400"
+                placeholder="Short operational context for the unit"
+              ></textarea>
+            </label>
+          </section>
+        </div>
+
+        <aside class="form-sidebar">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Record summary</p>
+                <h2 class="section-title">Unit snapshot</h2>
+              </div>
+            </div>
+
+            <div class="summary-list">
+              <article class="summary-card">
+                <p class="summary-card__eyebrow">Legal entity</p>
+                <p class="summary-card__value">{{ selectedEntityName() }}</p>
+                <p class="summary-card__meta">
+                  Business units are always tied to one legal entity.
+                </p>
+              </article>
+
+              <article class="summary-card">
+                <p class="summary-card__eyebrow">Manager</p>
+                <p class="summary-card__value">
+                  {{ form.managerEmployeeId || 'Not assigned yet' }}
+                </p>
+                <p class="summary-card__meta">
+                  Add an owner to make operational responsibility clearer.
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Lifecycle</p>
+                <h2 class="section-title">Record state</h2>
+              </div>
+            </div>
+
+            @if (isEditMode()) {
+              <label class="field-shell">
+                <span class="field-label">Status</span>
+                <div class="field-shell__select">
+                  <select class="field-select" name="status" [(ngModel)]="form.status">
+                    <option value="ACTIVE">ACTIVE</option>
+                    <option value="INACTIVE">INACTIVE</option>
+                  </select>
+                </div>
+              </label>
+            } @else {
+              <div class="section-note">
+                Business units are created as active records and can be updated later.
+              </div>
+            }
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Tips</p>
+                <h2 class="section-title">Before you save</h2>
+              </div>
+            </div>
+
+            <div class="helper-grid">
+              <article class="helper-card">
+                <h3>Name units for operations, not projects</h3>
+                <p>Stable unit names age better than temporary initiative names.</p>
+              </article>
+
+              <article class="helper-card">
+                <h3>Keep the code short</h3>
+                <p>Codes become the quickest reference in downstream setup screens.</p>
+              </article>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <div class="form-actions">
+        <div class="form-actions__buttons">
+          @if (isEditMode()) {
+            <button type="submit" class="btn btn-warning" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Updating...</span>
+              } @else {
+                <app-lucide-icon name="save" [size]="16" />
+                <span>Update Business Unit</span>
+              }
+            </button>
+          } @else {
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Creating...</span>
+              } @else {
+                <app-lucide-icon name="briefcaseBusiness" [size]="16" />
+                <span>Create Business Unit</span>
+              }
+            </button>
+          }
+
+          <a routerLink="/org/business-units" class="btn btn-secondary">
+            <app-lucide-icon name="x" [size]="16" />
+            <span>Cancel</span>
+          </a>
+        </div>
+
+        <div class="form-actions__feedback">
+          @if (successMessage) {
+            <div class="inline-note inline-note--success">
+              <app-lucide-icon name="checkCircle" [size]="16" />
+              <span>{{ successMessage }}</span>
+            </div>
+          }
+
+          @if (errorMessage) {
+            <div class="inline-note inline-note--danger">
+              <app-lucide-icon name="alertCircle" [size]="16" />
+              <span>{{ errorMessage }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  }
+</div>

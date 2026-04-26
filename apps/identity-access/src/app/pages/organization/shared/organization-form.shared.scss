@@ -1,0 +1,107 @@
+@reference "../../../../styles.scss";
+
+:host {
+  @apply block;
+}
+
+.form-page {
+  @apply space-y-6;
+}
+
+.form-stack {
+  @apply space-y-6;
+}
+
+.loading-state {
+  @apply inline-flex items-center gap-3 rounded-[30px] p-6 text-sm font-medium text-brand-700;
+}
+
+.loading-state--inline {
+  @apply rounded-[24px] border border-brand-200 bg-brand-50 px-4 py-3;
+}
+
+.form-layout {
+  @apply grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_360px];
+}
+
+.form-main,
+.form-sidebar {
+  @apply space-y-6;
+}
+
+.form-section-card {
+  @apply p-6;
+}
+
+.form-section-head {
+  @apply flex items-start justify-between gap-4;
+}
+
+.form-grid {
+  @apply mt-6 grid gap-5 md:grid-cols-2;
+}
+
+.form-grid__full {
+  @apply md:col-span-2;
+}
+
+.required-star {
+  @apply text-rose-500;
+}
+
+.section-note {
+  @apply mt-5 rounded-[24px] border border-slate-200 bg-slate-50/80 px-5 py-4 text-sm leading-6 text-slate-600;
+}
+
+.summary-list {
+  @apply mt-5 flex flex-col gap-3;
+}
+
+.summary-card {
+  @apply rounded-[24px] border border-slate-200/80 bg-sand-50/80 p-4;
+}
+
+.summary-card__eyebrow {
+  @apply text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500;
+}
+
+.summary-card__value {
+  @apply mt-2 text-sm font-semibold text-slate-900;
+}
+
+.summary-card__meta {
+  @apply mt-1 text-xs text-slate-500;
+}
+
+.summary-grid {
+  @apply mt-5 grid gap-3;
+}
+
+.summary-grid--two {
+  @apply md:grid-cols-2;
+}
+
+.helper-grid {
+  @apply mt-5 grid gap-3;
+}
+
+.helper-card {
+  @apply rounded-[24px] border border-slate-200/80 bg-white/80 p-4;
+}
+
+.helper-card h3 {
+  @apply text-sm font-semibold text-slate-900;
+}
+
+.helper-card p {
+  @apply mt-2 text-sm leading-6 text-slate-600;
+}
+
+.form-actions {
+  @apply flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between;
+}
+
+.form-actions__buttons,
+.form-actions__feedback {
+  @apply flex flex-wrap items-center gap-3;
+}

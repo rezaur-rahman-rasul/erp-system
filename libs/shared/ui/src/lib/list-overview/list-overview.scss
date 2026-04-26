@@ -1,58 +1,85 @@
 @reference "../../../../../apps/shell/src/styles.scss";
 
 :host {
-  display: block;
+  @apply block;
 }
 
 .overview-grid {
-  @apply grid gap-4 mb-8 grid-cols-1;
-
-  @apply xl:grid-cols-[2fr_1fr];
+  @apply grid gap-4;
+  @apply xl:grid-cols-[minmax(0,1.25fr)_300px_minmax(0,1fr)];
 }
 
-/* Overview card */
+.overview-card,
+.overview-guidance {
+  @apply p-6;
+}
+
 .overview-card {
-  @apply flex items-start gap-4 rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm;
+  @apply flex items-start gap-4;
 }
 
 .overview-icon {
-  @apply flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600;
+  @apply flex h-12 w-12 items-center justify-center rounded-[18px] border border-brand-200 bg-brand-50 text-brand-700;
+}
+
+.overview-copy {
+  @apply min-w-0;
 }
 
 .overview-title {
-  @apply text-lg font-semibold text-slate-900;
+  @apply mt-2 text-xl font-semibold tracking-tight text-slate-900;
 }
 
 .overview-subtitle {
-  @apply mt-1 text-sm text-slate-500;
+  @apply mt-3 text-sm leading-6 text-slate-600;
 }
 
-/* Count card */
 .count-card {
-  @apply rounded-[28px] border border-blue-700/20 bg-blue-600 p-6 text-white shadow-md shadow-blue-900/10;
+  @apply rounded-[30px] border border-brand-700/10 bg-brand-700 p-6 text-white shadow-panel;
 }
 
 .count-card-row {
-  @apply flex items-center justify-between;
+  @apply flex items-start justify-between gap-4;
 }
 
 .count-card-label {
-  @apply text-sm font-medium text-blue-100;
+  @apply text-sm font-semibold uppercase tracking-[0.16em] text-brand-100;
 }
 
 .count-card-value {
-  @apply mt-3 text-4xl font-bold;
+  @apply mt-4 text-4xl font-semibold tracking-tight;
 }
 
 .count-card-icon {
-  @apply flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15;
+  @apply flex h-12 w-12 items-center justify-center rounded-[18px] border border-white/10 bg-white/10;
 }
 
-/* Progress */
 .count-progress {
-  @apply mt-5 h-2 w-full rounded-full bg-white/20;
+  @apply mt-6 h-2 w-full rounded-full bg-white/10;
 }
 
 .count-progress-fill {
-  @apply h-2 w-2/3 rounded-full bg-white;
+  @apply h-2 w-2/3 rounded-full bg-sand-300;
+}
+
+.overview-guidance-list {
+  @apply mt-4 space-y-4;
+}
+
+.overview-guidance-item {
+  @apply flex items-start gap-3;
+}
+
+.overview-guidance-bullet {
+  @apply mt-2 inline-flex h-2.5 w-2.5 rounded-full bg-brand-400;
+}
+
+.overview-guidance-item p {
+  @apply text-sm leading-6 text-slate-600;
+}
+
+@media (max-width: 1279px) {
+  .overview-grid {
+    @apply grid-cols-1;
+  }
 }

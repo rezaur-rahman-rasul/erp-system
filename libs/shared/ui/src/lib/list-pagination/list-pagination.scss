@@ -1,22 +1,21 @@
 @reference "../../../../../apps/shell/src/styles.scss";
 
 :host {
-  display: block;
+  @apply block;
 }
 
 .pagination-bar {
-  @apply flex flex-col gap-4 border-t border-slate-200 bg-slate-50 px-5 py-6;
-
+  @apply flex flex-col gap-4 border-t border-slate-200/80 bg-sand-50/70 px-5 py-6;
   @apply lg:flex-row lg:items-center lg:justify-between;
 }
 
 .pagination-left,
 .pagination-right {
-  @apply flex flex-wrap items-center gap-4;
+  @apply flex flex-wrap items-center gap-3;
 }
 
 .pagination-center {
-  @apply text-sm text-slate-500;
+  @apply text-sm text-slate-600;
 }
 
 .pagination-label {
@@ -24,15 +23,15 @@
 }
 
 .rows-select {
-  @apply cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm outline-none transition-all duration-300;
-  @apply hover:border-slate-300 hover:shadow-md focus:border-slate-900 focus:ring-4 focus:ring-slate-900/10;
+  @apply cursor-pointer rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm outline-none transition;
+  @apply hover:border-slate-300 hover:shadow-md focus:border-brand-300 focus:ring-4 focus:ring-brand-100;
   appearance: none;
 }
 
 .pager-btn {
-  @apply inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition-all duration-300;
-  @apply hover:border-slate-300 hover:bg-slate-50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98];
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/80 focus-visible:ring-offset-2;
+  @apply inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition;
+  @apply hover:-translate-y-0.5 hover:border-slate-300 hover:bg-sand-50 hover:shadow-md active:scale-[0.98];
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-2;
   @apply disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-sm;
 }
 
@@ -41,12 +40,12 @@
 }
 
 .page-number {
-  @apply inline-flex h-9 min-w-9 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-300;
-  @apply hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 hover:-translate-y-0.5;
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/70 focus-visible:ring-offset-1;
+  @apply inline-flex h-10 min-w-10 cursor-pointer items-center justify-center rounded-2xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm transition;
+  @apply hover:-translate-y-0.5 hover:border-slate-300 hover:bg-sand-50 hover:text-slate-900;
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-300 focus-visible:ring-offset-1;
 }
 
 .page-number-active {
-  @apply border-slate-800 bg-slate-900 text-white shadow-md shadow-slate-900/20;
-  @apply hover:border-slate-700 hover:bg-slate-800 hover:text-white;
+  @apply border-brand-700 bg-brand-700 text-white shadow-md shadow-brand-700/20;
+  @apply hover:border-brand-800 hover:bg-brand-800 hover:text-white;
 }

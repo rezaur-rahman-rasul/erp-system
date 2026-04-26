@@ -1,0 +1,109 @@
+<div class="hierarchy-page page-shell">
+  <app-list-header
+    icon="gitBranchPlus"
+    badge="Organization Setup"
+    title="Organization Structure"
+    subtitle="Inspect the current legal entity, branch, and department structure returned by the backend."
+  ></app-list-header>
+
+  @if (loadError()) {
+    <div class="inline-note inline-note--danger">
+      <app-lucide-icon name="alertCircle" [size]="16" />
+      <span>{{ loadError() }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="empty-panel surface-card">
+      <div class="inline-flex items-center gap-3">
+        <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+        <span>Loading organization structure...</span>
+      </div>
+    </div>
+  } @else {
+    <div class="hierarchy-layout">
+      <aside class="hierarchy-sidebar">
+        <section class="surface-card hierarchy-panel">
+          <p class="section-kicker">Legal entities</p>
+          <h2 class="section-title">Structure anchors</h2>
+          <p class="section-copy">
+            Choose a legal entity to inspect its branches and department lines.
+          </p>
+
+          <div class="hierarchy-select-list">
+            @for (tree of trees(); track tree.legalEntityId) {
+              <button
+                type="button"
+                class="hierarchy-select-card"
+                [class.hierarchy-select-card--active]="selectedTree().legalEntityId === tree.legalEntityId"
+                (click)="selectTree(tree.legalEntityId)"
+              >
+                <p class="hierarchy-select-card__title">{{ tree.legalEntityName }}</p>
+                <p class="hierarchy-select-card__meta">{{ tree.legalEntityCode }}</p>
+                <div class="hierarchy-select-card__stats">
+                  <span class="status-chip status-chip--accent">{{ tree.businessUnits.length }} units</span>
+                  <span class="status-chip status-chip--neutral">{{ tree.branches.length }} branches</span>
+                </div>
+              </button>
+            }
+          </div>
+        </section>
+      </aside>
+
+      <div class="hierarchy-content">
+        @if (!selectedTree()) {
+          <div class="empty-panel surface-card">No organization tree data is available yet.</div>
+        } @else {
+          <section class="surface-card hierarchy-panel">
+            <p class="section-kicker">Selected structure</p>
+            <h2 class="section-title">{{ selectedTree()!.legalEntityName }}</h2>
+            <p class="section-copy">
+              {{ selectedTree()!.businessUnits.length }} business units and
+              {{ selectedTree()!.branches.length }} branches are currently linked to this
+              legal entity.
+            </p>
+
+            <div class="hierarchy-branch-list">
+              @for (branch of selectedTree()!.branches; track branch.id) {
+                <article class="hierarchy-branch-card">
+                  <div class="hierarchy-branch-card__head">
+                    <div>
+                      <h3 class="hierarchy-branch-card__title">{{ branch.name }}</h3>
+                      <p class="hierarchy-branch-card__meta">
+                        {{ branch.code }} •
+                        {{ branch.businessUnitId || 'No business unit linked' }}
+                      </p>
+                    </div>
+
+                    <div class="hierarchy-branch-card__stats">
+                      <span class="status-chip status-chip--neutral">{{ branch.locations.length }} locations</span>
+                      <span class="status-chip status-chip--accent">{{ branchDepartmentCount(branch) }} departments</span>
+                    </div>
+                  </div>
+
+                  @if (departmentLines(branch.departments).length === 0) {
+                    <div class="section-note">No departments are linked under this branch yet.</div>
+                  } @else {
+                    <div class="hierarchy-lines">
+                      @for (line of departmentLines(branch.departments); track line.id) {
+                        <div class="hierarchy-line" [style.marginLeft.px]="line.depth * 18">
+                          <div class="hierarchy-line__rail">
+                            <span class="hierarchy-line__dot"></span>
+                          </div>
+                          <div class="hierarchy-line__copy">
+                            <p class="hierarchy-line__title">{{ line.name }}</p>
+                            <p class="hierarchy-line__meta">{{ line.code }} • {{ line.status }}</p>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </article>
+              }
+            </div>
+          </section>
+        }
+      </div>
+    </div>
+  }
+</div>

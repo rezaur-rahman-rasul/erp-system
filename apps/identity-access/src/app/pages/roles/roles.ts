@@ -13,8 +13,8 @@ import {
   ListPagination,
   LucideIcon,
 } from '@hishab-nikash/shared-ui';
-import { IAMService } from '../../services/iam.service';
 import { Role } from '@hishab-nikash/shared-models';
+import { IAMService } from '../../services/iam.service';
 
 type SortDirection = 'asc' | 'desc';
 type RoleSortColumn =
@@ -26,6 +26,7 @@ type RoleSortColumn =
   | 'createdAt'
   | 'lastUpdatedBy'
   | 'lastUpdatedAt';
+
 type RoleFilters = {
   code: string;
   name: string;
@@ -49,7 +50,7 @@ type RoleFilters = {
     LucideIcon,
   ],
   templateUrl: './roles.html',
-  styleUrls: ['./roles.scss'],
+  styleUrl: './roles.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RolesComponent {
@@ -61,6 +62,11 @@ export class RolesComponent {
   readonly deletingRoleId = signal<string | null>(null);
   readonly actionMessage = signal('');
   readonly actionError = signal('');
+  readonly guidanceItems = [
+    'Use permission counts to spot broad roles and empty roles quickly.',
+    'Open a role to update its name, description, and included permissions.',
+    'Use the access directory when choosing permissions for a role.',
+  ];
 
   readonly filters = signal<RoleFilters>({
     code: '',
@@ -111,6 +117,7 @@ export class RolesComponent {
     });
 
     const sort = this.currentSort();
+
     if (!sort) {
       return rows;
     }
@@ -123,6 +130,14 @@ export class RolesComponent {
   readonly totalRolesCount = computed(() => this.filteredRoles().length);
   readonly configuredRolesCount = computed(
     () => this.allRoles().filter((role) => role.permissions.length > 0).length
+  );
+  readonly emptyRolesCount = computed(
+    () => this.allRoles().filter((role) => role.permissions.length === 0).length
+  );
+  readonly highCoverageRolesCount = computed(
+    () =>
+      this.allRoles().filter((role) => role.permissions.length > this.permissionPreviewLimit)
+        .length
   );
   readonly totalPermissionsCount = computed(
     () =>
@@ -162,6 +177,7 @@ export class RolesComponent {
 
   toggleSort(column: RoleSortColumn): void {
     const current = this.currentSort();
+
     if (current?.column === column) {
       this.currentSort.set({
         column,
@@ -175,34 +191,25 @@ export class RolesComponent {
 
   sortIcon(column: RoleSortColumn): string {
     const current = this.currentSort();
+
     if (!current || current.column !== column) {
-      return '⇅';
+      return '^v';
     }
 
-    return current.direction === 'asc' ? '↑' : '↓';
+    return current.direction === 'asc' ? '^' : 'v';
   }
 
   singleArrowSortIcon(column: RoleSortColumn): string {
     const current = this.currentSort();
+
     if (!current || current.column !== column) {
-      return '↑';
+      return '^';
     }
 
-    return current.direction === 'asc' ? '↑' : '↓';
+    return current.direction === 'asc' ? '^' : 'v';
   }
 
-  setFilter(
-    key:
-      | 'code'
-      | 'name'
-      | 'description'
-      | 'permission'
-      | 'createdBy'
-      | 'createdAt'
-      | 'lastUpdatedBy'
-      | 'lastUpdatedAt',
-    value: string
-  ): void {
+  setFilter(key: keyof RoleFilters, value: string): void {
     this.filters.update((state) => ({ ...state, [key]: value }));
     this.currentPage.set(1);
   }
@@ -234,10 +241,6 @@ export class RolesComponent {
 
   serialOf(index: number): number {
     return (this.currentPage() - 1) * this.rowsPerPage() + index + 1;
-  }
-
-  permissionCount(role: Role): number {
-    return role.permissions.length;
   }
 
   visiblePermissions(role: Role): string[] {
@@ -317,13 +320,16 @@ export class RolesComponent {
         const backendMessage = error?.error?.message || error?.error?.error || '';
         const deleteNotSupported =
           typeof backendMessage === 'string' &&
-          backendMessage.toLowerCase().includes("request method 'delete' is not supported");
+          backendMessage
+            .toLowerCase()
+            .includes("request method 'delete' is not supported");
 
         if (status === 404 || status === 405 || deleteNotSupported) {
-          this.actionError.set('Delete endpoint is not available in backend yet.');
+          this.actionError.set('Delete is not available right now.');
         } else {
           this.actionError.set(error?.error?.message || 'Failed to delete role.');
         }
+
         this.deletingRoleId.set(null);
       },
     });
@@ -339,9 +345,7 @@ export class RolesComponent {
         this.isLoading.set(false);
       },
       error: (error) => {
-        this.actionError.set(
-          error?.error?.message || 'Failed to load roles.'
-        );
+        this.actionError.set(error?.error?.message || 'Failed to load roles.');
         this.isLoading.set(false);
       },
     });
@@ -381,6 +385,7 @@ export class RolesComponent {
     }
 
     const parsedDate = new Date(date);
+
     if (Number.isNaN(parsedDate.getTime())) {
       return '';
     }

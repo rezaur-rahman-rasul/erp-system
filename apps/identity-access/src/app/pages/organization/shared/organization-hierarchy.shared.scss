@@ -1,0 +1,99 @@
+@reference "../../../../styles.scss";
+
+:host {
+  @apply block;
+}
+
+.hierarchy-page {
+  @apply space-y-6;
+}
+
+.hierarchy-layout {
+  @apply grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)];
+}
+
+.hierarchy-sidebar,
+.hierarchy-content {
+  @apply space-y-6;
+}
+
+.hierarchy-panel {
+  @apply p-5;
+}
+
+.hierarchy-select-list {
+  @apply mt-5 flex flex-col gap-3;
+}
+
+.hierarchy-select-card {
+  @apply w-full rounded-[24px] border border-slate-200/80 bg-white/80 px-4 py-4 text-left transition;
+  @apply hover:-translate-y-0.5 hover:border-brand-300 hover:bg-brand-50/40;
+}
+
+.hierarchy-select-card--active {
+  @apply border-brand-300 bg-brand-50/70;
+}
+
+.hierarchy-select-card__title {
+  @apply text-sm font-semibold text-slate-900;
+}
+
+.hierarchy-select-card__meta {
+  @apply mt-1 text-xs text-slate-500;
+}
+
+.hierarchy-select-card__stats {
+  @apply mt-4 flex flex-wrap gap-2;
+}
+
+.hierarchy-branch-list {
+  @apply mt-6 grid gap-4;
+}
+
+.hierarchy-branch-card {
+  @apply rounded-[26px] border border-slate-200/80 bg-white/85 p-5;
+}
+
+.hierarchy-branch-card__head {
+  @apply flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between;
+}
+
+.hierarchy-branch-card__title {
+  @apply text-base font-semibold tracking-tight text-slate-900;
+}
+
+.hierarchy-branch-card__meta {
+  @apply mt-1 text-sm text-slate-600;
+}
+
+.hierarchy-branch-card__stats {
+  @apply flex flex-wrap gap-2;
+}
+
+.hierarchy-lines {
+  @apply mt-5 space-y-2;
+}
+
+.hierarchy-line {
+  @apply flex items-center gap-3 rounded-[20px] border border-slate-200/80 bg-slate-50/80 px-4 py-3;
+}
+
+.hierarchy-line__rail {
+  @apply flex items-center gap-2;
+}
+
+.hierarchy-line__dot {
+  @apply h-2.5 w-2.5 rounded-full bg-brand-400;
+}
+
+.hierarchy-line__copy {
+  @apply min-w-0 flex-1;
+}
+
+.hierarchy-line__title {
+  @apply text-sm font-semibold text-slate-900;
+}
+
+.hierarchy-line__meta {
+  @apply mt-1 text-xs text-slate-500;
+}

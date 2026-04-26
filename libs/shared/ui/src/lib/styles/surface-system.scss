@@ -1,0 +1,169 @@
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    @apply bg-slate-50 text-slate-900;
+  }
+
+  body {
+    @apply min-h-screen bg-slate-50 font-sans text-slate-900 antialiased;
+    background-image:
+      radial-gradient(circle at top left, rgba(60, 133, 123, 0.12), transparent 30%),
+      radial-gradient(circle at top right, rgba(100, 116, 139, 0.12), transparent 26%),
+      linear-gradient(180deg, #f7fbfb 0%, #eef4f5 100%);
+  }
+
+  * {
+    @apply border-slate-200;
+  }
+
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-[1420px] space-y-6;
+  }
+
+  .surface-card {
+    @apply rounded-[30px] border border-white/70 bg-white/90 shadow-panel backdrop-blur-sm;
+  }
+
+  .section-kicker {
+    @apply text-[11px] font-bold uppercase tracking-[0.28em] text-brand-600;
+  }
+
+  .section-title {
+    @apply text-2xl font-semibold tracking-tight text-slate-900 lg:text-[1.72rem];
+  }
+
+  .section-copy {
+    @apply mt-2 max-w-3xl text-sm leading-6 text-slate-600;
+  }
+
+  .metric-tile {
+    @apply rounded-[24px] border border-slate-200/80 bg-sand-50/80 p-5;
+  }
+
+  .metric-tile__eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500;
+  }
+
+  .metric-tile__value {
+    @apply mt-4 text-3xl font-semibold tracking-tight text-slate-900;
+  }
+
+  .metric-tile__note {
+    @apply mt-2 text-sm leading-6 text-slate-600;
+  }
+
+  .status-chip {
+    @apply inline-flex items-center justify-center rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-700;
+    @apply border border-slate-200 bg-slate-50;
+  }
+
+  .status-chip--soft {
+    @apply border-sand-200 bg-sand-100 text-sand-800;
+  }
+
+  .status-chip--neutral {
+    @apply border-slate-200 bg-slate-100 text-slate-700;
+  }
+
+  .status-chip--accent {
+    @apply border-brand-200 bg-brand-50 text-brand-700;
+  }
+
+  .status-chip--success {
+    @apply border-emerald-200 bg-emerald-50 text-emerald-700;
+  }
+
+  .status-chip--warning {
+    @apply border-amber-200 bg-amber-50 text-amber-700;
+  }
+
+  .inline-note {
+    @apply inline-flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold;
+  }
+
+  .inline-note--danger {
+    @apply border-rose-200 bg-rose-50 text-rose-700;
+  }
+
+  .inline-note--success {
+    @apply border-emerald-200 bg-emerald-50 text-emerald-700;
+  }
+
+  .field-shell {
+    @apply flex flex-col;
+  }
+
+  .field-label {
+    @apply mb-2 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500;
+  }
+
+  .field-helper {
+    @apply mt-2 text-xs leading-5 text-slate-500;
+  }
+
+  .field-shell__input,
+  .field-shell__select,
+  .field-shell__textarea {
+    @apply relative flex items-center rounded-[20px] border border-slate-200 bg-white/95 px-4 py-3 shadow-sm transition;
+    @apply focus-within:border-brand-300 focus-within:ring-4 focus-within:ring-brand-100;
+  }
+
+  .field-shell__textarea {
+    @apply items-start px-0 py-0;
+  }
+
+  .field-shell__icon {
+    @apply text-slate-400;
+  }
+
+  .field-input,
+  .field-select {
+    @apply w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400;
+  }
+
+  .field-input {
+    @apply ml-3;
+  }
+
+  .field-select {
+    @apply appearance-none px-0;
+  }
+
+  .field-textarea {
+    @apply min-h-[140px] w-full resize-y rounded-[20px] border border-slate-200 bg-white/95 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition;
+    @apply placeholder:text-slate-400 focus:border-brand-300 focus:ring-4 focus:ring-brand-100;
+  }
+
+  .field-error {
+    @apply mt-2 text-xs font-medium text-rose-600;
+  }
+
+  .field-success {
+    @apply mt-2 text-xs font-medium text-emerald-600;
+  }
+
+  .empty-state-card {
+    @apply flex items-start gap-4 rounded-[24px] border border-dashed border-slate-300 bg-slate-50/80 p-5 text-slate-600;
+  }
+
+  .empty-state-card h3 {
+    @apply text-base font-semibold tracking-tight text-slate-900;
+  }
+
+  .empty-state-card p {
+    @apply mt-1 text-sm leading-6 text-slate-600;
+  }
+
+  .empty-state-card--full {
+    @apply min-h-[320px] items-center justify-center;
+  }
+}

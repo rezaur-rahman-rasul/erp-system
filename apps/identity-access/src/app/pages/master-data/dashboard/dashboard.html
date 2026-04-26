@@ -1,0 +1,199 @@
+<div class="master-dashboard page-shell">
+  <section class="master-hero surface-card">
+    <div class="master-hero__copy">
+      <div class="master-hero__eyebrow">
+        <app-lucide-icon name="databaseZap" [size]="16" />
+        <span>Master Data Service</span>
+      </div>
+
+      <h1>{{ greeting }}, {{ currentUser()?.displayName || 'operator' }}.</h1>
+      <p>
+        The shell, service registry, and route model are now aligned for Master Data.
+        Use this workspace to monitor the reference sets, commercial parties,
+        operations masters, finance structure, and people records returned by the
+        live service.
+      </p>
+
+      <div class="master-hero__badges">
+        <span class="master-hero__badge">
+          <app-lucide-icon name="calendarDays" [size]="15" />
+          <span>{{ todayLabel }}</span>
+        </span>
+
+        <span class="master-hero__badge master-hero__badge--strong">
+          <app-lucide-icon name="building2" [size]="15" />
+          <span>{{ currentUser()?.tenantId || 'ERP-DEFAULT' }}</span>
+        </span>
+
+        <span class="master-hero__badge">
+          <app-lucide-icon name="route" [size]="15" />
+          <span>/master -> /master-data</span>
+        </span>
+      </div>
+    </div>
+
+    <aside class="master-hero__panel">
+      <p class="section-kicker">Alignment Pulse</p>
+      <h2>Service readiness</h2>
+      <p>
+        The workspace now exposes the same three layers for Master Data as the
+        other services: shell navigation, typed frontend contracts, and a live
+        data service wrapper.
+      </p>
+
+      <div class="master-hero__panel-stats">
+        <div>
+          <span>Datasets</span>
+          <strong>{{ domainStates().length }}</strong>
+        </div>
+        <div>
+          <span>Records</span>
+          <strong>{{ totalRecords() }}</strong>
+        </div>
+        <div>
+          <span>Active</span>
+          <strong>{{ totalActiveRecords() }}</strong>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  @if (loadError()) {
+    <div class="inline-note inline-note--danger">
+      <app-lucide-icon name="alertCircle" [size]="16" />
+      <span>{{ loadError() }}</span>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="empty-state-card empty-state-card--full">
+      <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+      <div>
+        <h3>Loading master-data overview</h3>
+        <p>Reading the current datasets and service alignment signals.</p>
+      </div>
+    </div>
+  } @else {
+    <section class="summary-grid">
+      @for (card of summaryCards(); track card.label) {
+        <article class="metric-tile">
+          <div class="summary-grid__head">
+            <p class="metric-tile__eyebrow">{{ card.label }}</p>
+            <div class="summary-grid__icon">
+              <app-lucide-icon [name]="card.icon" [size]="18" />
+            </div>
+          </div>
+
+          <p class="metric-tile__value">{{ card.value }}</p>
+          <p class="metric-tile__note">{{ card.note }}</p>
+        </article>
+      }
+    </section>
+
+    <section class="area-grid">
+      @for (category of categoryStates(); track category.key) {
+        <article class="area-card surface-card">
+          <div class="area-card__header">
+            <div class="area-card__icon">
+              <app-lucide-icon [name]="category.icon" [size]="18" />
+            </div>
+
+            <div class="area-card__copy">
+              <p class="section-kicker">{{ category.title }}</p>
+              <h2>{{ category.recordCount }} records</h2>
+              <p>{{ category.description }}</p>
+            </div>
+          </div>
+
+          <div class="area-card__meta">
+            <span class="status-chip status-chip--soft">
+              {{ category.domainCount }} dataset(s)
+            </span>
+            <span class="status-chip status-chip--success">
+              {{ category.activeCount }} active
+            </span>
+          </div>
+
+          <div class="area-card__domains">
+            @for (domain of category.domains; track domain.key) {
+              <div class="area-card__domain">
+                <div>
+                  <strong>{{ domain.title }}</strong>
+                  <span>{{ domain.lastUpdatedLabel }}</span>
+                </div>
+
+                <span class="status-chip status-chip--neutral">
+                  {{ domain.count }}
+                </span>
+              </div>
+            }
+          </div>
+        </article>
+      }
+    </section>
+
+    <section class="insight-grid">
+      <article class="surface-card insight-card">
+        <p class="section-kicker">Record Density</p>
+        <h2 class="section-title">Most populated domains</h2>
+        <p class="section-copy">
+          This helps surface where the service already carries the most live
+          footprint so the team can prioritize follow-up UX and validation work.
+        </p>
+
+        <div class="insight-list">
+          @for (domain of busiestDomains(); track domain.key) {
+            <div class="insight-row">
+              <div class="insight-row__copy">
+                <strong>{{ domain.title }}</strong>
+                <span>
+                  {{ domain.activeCount }} active and
+                  {{ domain.inactiveCount }} inactive
+                </span>
+              </div>
+
+              <span class="insight-row__metric">{{ domain.count }}</span>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="surface-card insight-card">
+        <p class="section-kicker">Consistency Checks</p>
+        <h2 class="section-title">Service alignment signals</h2>
+        <p class="section-copy">
+          These signals focus on the gaps that mattered here: route coverage,
+          API wiring, ownership fields, and consistent contract shape.
+        </p>
+
+        <div class="insight-list">
+          @for (item of alignmentSignals(); track item.title) {
+            <div class="insight-row">
+              <div class="insight-row__copy">
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.note }}</span>
+              </div>
+
+              <span class="insight-row__metric">{{ item.value }}</span>
+            </div>
+          }
+        </div>
+      </article>
+    </section>
+
+    <section class="quick-link-grid">
+      @for (item of quickLinks; track item.title) {
+        <a [routerLink]="item.route" class="quick-link-card">
+          <div class="quick-link-card__icon">
+            <app-lucide-icon [name]="item.icon" [size]="18" />
+          </div>
+
+          <div>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.copy }}</p>
+          </div>
+        </a>
+      }
+    </section>
+  }
+</div>

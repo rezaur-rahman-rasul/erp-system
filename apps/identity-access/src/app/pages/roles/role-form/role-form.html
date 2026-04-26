@@ -1,233 +1,257 @@
-<div class="role-form-page">
-  <div class="max-w-6xl mx-auto">
-    @if (isEditMode()) {
-      <app-form-header
-        icon="pencil"
-        badge="Access Control"
-        title="Edit Role"
-        subtitle="Update the role code, name, description, and permission bundle."
-        actionText="Back to Roles"
-        actionRoute="/iam/roles"
-      ></app-form-header>
-    } @else {
-      <app-form-header
-        icon="shieldPlus"
-        badge="Access Control"
-        title="Create Role"
-        subtitle="Define a new role and assign the permissions it should expose."
-        actionText="Back to Roles"
-        actionRoute="/iam/roles"
-      ></app-form-header>
-    }
+<div class="form-page page-shell">
+  @if (isEditMode()) {
+    <app-form-header
+      icon="pencil"
+      badge="Role Management"
+      title="Edit Role"
+      subtitle="Update the role code, name, description, and included permissions."
+      actionText="Back to Roles"
+      actionRoute="/iam/roles"
+    ></app-form-header>
+  } @else {
+    <app-form-header
+      icon="shieldPlus"
+      badge="Role Management"
+      title="Create Role"
+      subtitle="Create a role and choose the permissions it should include."
+      actionText="Back to Roles"
+      actionRoute="/iam/roles"
+    ></app-form-header>
+  }
 
-    @if (isLoadingRole()) {
-      <div class="form-section flex items-center justify-center gap-3 py-14 text-slate-400">
-        <app-lucide-icon name="loader" [size]="22" class="animate-spin" />
-        <span class="text-sm font-semibold">Loading role data...</span>
-      </div>
-    }
-
-    @if (!isLoadingRole()) {
-      <form #roleForm="ngForm" (ngSubmit)="saveRole(roleForm)" novalidate>
-        <div class="form-layout">
-          <div class="form-main space-y-6">
-            <div class="form-section">
-              <div class="form-section-title">
-                <app-lucide-icon name="shieldCheck" [size]="18" />
-                <span>Role Identity</span>
+  @if (isLoadingRole()) {
+    <div class="loading-state surface-card">
+      <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+      <span>Loading role data...</span>
+    </div>
+  } @else {
+    <form #roleForm="ngForm" (ngSubmit)="saveRole(roleForm)" novalidate class="form-stack">
+      <div class="form-layout">
+        <div class="form-main">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Role Details</p>
+                <h2 class="section-title">Definition</h2>
               </div>
+            </div>
 
-              <div class="form-grid">
-                <div class="form-field">
-                  <label class="field-label" for="code">
-                    Role Code <span class="required-star">*</span>
-                  </label>
+            <div class="form-grid">
+              <label class="field-shell">
+                <span class="field-label">Role code <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="hash" [size]="16" class="field-shell__icon" />
                   <input
-                    id="code"
-                    name="code"
                     type="text"
-                    class="form-input"
+                    class="field-input"
+                    name="code"
                     [(ngModel)]="form.code"
                     required
                     maxlength="80"
-                    placeholder="e.g. PLATFORM_ADMIN"
+                    placeholder="PLATFORM_ADMIN"
                     #codeCtrl="ngModel"
                   />
-                  @if (codeCtrl.invalid && codeCtrl.touched) {
-                    <span class="field-error">Role code is required and must be at most 80 characters.</span>
-                  }
                 </div>
+                @if (codeCtrl.invalid && codeCtrl.touched) {
+                  <span class="field-error">Role code is required.</span>
+                }
+              </label>
 
-                <div class="form-field">
-                  <label class="field-label" for="name">
-                    Role Name <span class="required-star">*</span>
-                  </label>
+              <label class="field-shell">
+                <span class="field-label">Role name <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="shieldCheck" [size]="16" class="field-shell__icon" />
                   <input
-                    id="name"
-                    name="name"
                     type="text"
-                    class="form-input"
+                    class="field-input"
+                    name="name"
                     [(ngModel)]="form.name"
                     required
                     maxlength="120"
-                    placeholder="e.g. Platform Administrator"
+                    placeholder="Platform Administrator"
                     #nameCtrl="ngModel"
                   />
-                  @if (nameCtrl.invalid && nameCtrl.touched) {
-                    <span class="field-error">Role name is required and must be at most 120 characters.</span>
-                  }
                 </div>
+                @if (nameCtrl.invalid && nameCtrl.touched) {
+                  <span class="field-error">Role name is required.</span>
+                }
+              </label>
 
-                <div class="form-field col-span-full">
-                  <label class="field-label" for="description">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    class="form-input form-textarea"
-                    [(ngModel)]="form.description"
-                    maxlength="500"
-                    rows="5"
-                    placeholder="Describe what this role can do."
-                  ></textarea>
-                  <div class="flex items-center justify-between">
-                    <span class="field-helper">Optional. Maximum 500 characters.</span>
-                    <span class="field-helper">{{ descriptionLength }}/500</span>
-                  </div>
+              <label class="field-shell form-grid__full">
+                <span class="field-label">Description</span>
+                <textarea
+                  class="field-textarea"
+                  name="description"
+                  [(ngModel)]="form.description"
+                  maxlength="500"
+                  rows="5"
+                  placeholder="Describe what this role is responsible for."
+                ></textarea>
+                <div class="form-helper-row">
+                  <span class="field-helper">Optional. Maximum 500 characters.</span>
+                  <span class="field-helper">{{ descriptionLength }}/500</span>
                 </div>
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Permission Overview</p>
+                <h2 class="section-title">Catalog status</h2>
               </div>
             </div>
 
-            <div class="form-section">
-              <div class="form-section-title">
-                <app-lucide-icon name="info" [size]="18" />
-                <span>Guidance</span>
-              </div>
+            <div class="guidance-grid">
+              <article class="guidance-card">
+                <p class="guidance-card__label">Available permissions</p>
+                <strong>{{ permissionCatalog().length }}</strong>
+                <span>Currently listed in the access directory</span>
+              </article>
 
-              <div class="guidance-grid">
-                <article class="guidance-card">
-                  <p class="guidance-label">Code format</p>
-                  <p class="guidance-text">
-                    Use a stable technical identifier like `PLATFORM_ADMIN` or `SALES_MANAGER`.
-                  </p>
-                </article>
+              <article class="guidance-card">
+                <p class="guidance-card__label">Modules</p>
+                <strong>{{ serviceCount() }}</strong>
+                <span>Distinct system areas</span>
+              </article>
 
-                <article class="guidance-card">
-                  <p class="guidance-label">Permissions</p>
-                  <p class="guidance-text">
-                    Add one permission key at a time, or paste a comma or newline separated list.
-                  </p>
-                </article>
+              <article class="guidance-card">
+                <p class="guidance-card__label">Selected</p>
+                <strong>{{ permissions().length }}</strong>
+                <span>Permissions selected for this role</span>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <aside class="form-sidebar">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Permissions</p>
+                <h2 class="section-title">Permission setup</h2>
               </div>
             </div>
-          </div>
 
-          <aside class="form-sidebar">
-            <div class="form-section h-full">
-              <div class="form-section-title">
-                <app-lucide-icon name="keyRound" [size]="18" />
-                <span>Permissions <span class="required-star">*</span></span>
-              </div>
-
+            <label class="field-shell">
+              <span class="field-label">Add permission</span>
               <div class="permission-entry">
-                <label class="field-label" for="permissionInput">Add Permission</label>
-                <div class="permission-input-row">
+                <div class="field-shell__input permission-entry__input">
+                  <app-lucide-icon name="keyRound" [size]="16" class="field-shell__icon" />
                   <input
-                    id="permissionInput"
-                    name="permissionInput"
                     type="text"
-                    class="form-input"
+                    class="field-input"
+                    name="permissionInput"
                     [(ngModel)]="permissionInput"
-                    placeholder="e.g. user.read or role.update"
+                    placeholder="e.g. users.create"
                     (keydown)="handlePermissionInput($event)"
                     (paste)="onPermissionPaste($event)"
                   />
-                  <button type="button" class="btn btn-secondary shrink-0" (click)="addPermission()">
-                    Add
-                  </button>
                 </div>
-                <p class="field-helper">
-                  Press `Enter` or `,` to add. Duplicate values are ignored.
-                </p>
-              </div>
 
-              @if (!hasPermissions) {
-                <div class="permissions-empty">
-                  <div class="empty-icon">
-                    <app-lucide-icon name="shieldAlert" [size]="24" />
-                  </div>
-                  <h3 class="empty-title">No permissions added</h3>
-                  <p class="empty-subtitle">
-                    Add at least one permission before saving the role.
-                  </p>
+                <button type="button" class="btn btn-secondary" (click)="addPermission()">
+                  Add
+                </button>
+              </div>
+              <span class="field-helper">
+                Press Enter or comma to add multiple permissions.
+              </span>
+            </label>
+
+            @if (isLoadingCatalog()) {
+              <div class="loading-state loading-state--inline">
+                <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+                <span>Loading permission catalog...</span>
+              </div>
+            } @else {
+              <div class="catalog-suggestions">
+                <div class="catalog-suggestions__header">
+                  <p class="section-kicker">Catalog suggestions</p>
+                  <span>{{ catalogSuggestions().length }} available</span>
                 </div>
-              } @else {
-                <div class="permission-list">
-                  @for (permission of permissions(); track permission) {
-                    <div class="permission-chip">
-                      <span>{{ permission }}</span>
-                      <button type="button" class="permission-chip-remove" (click)="removePermission(permission)">
-                        <app-lucide-icon name="x" [size]="14" />
-                      </button>
-                    </div>
+
+                <div class="catalog-suggestions__list">
+                  @for (permission of catalogSuggestions(); track permission.code) {
+                    <button
+                      type="button"
+                      class="catalog-chip"
+                      (click)="addCatalogPermission(permission.code)"
+                    >
+                      <span>{{ permission.code }}</span>
+                      <small>{{ permission.service }}</small>
+                    </button>
                   }
                 </div>
-              }
-
-              <div class="permissions-summary">
-                <p class="summary-label">Selected</p>
-                <p class="summary-value">{{ permissions().length }} permission(s)</p>
               </div>
-            </div>
-          </aside>
-        </div>
-
-        <div class="flex flex-wrap items-center justify-between gap-4 pt-4">
-          <div class="flex items-center gap-3">
-            @if (isEditMode()) {
-              <button type="submit" class="btn btn-warning" [disabled]="isSubmitting">
-                @if (isSubmitting) {
-                  <app-lucide-icon name="loader" [size]="16" class="animate-spin" />
-                  <span>Updating...</span>
-                } @else {
-                  <app-lucide-icon name="save" [size]="16" />
-                  <span>Update Role</span>
-                }
-              </button>
-            } @else {
-              <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
-                @if (isSubmitting) {
-                  <app-lucide-icon name="loader" [size]="16" class="animate-spin" />
-                  <span>Creating...</span>
-                } @else {
-                  <app-lucide-icon name="shieldPlus" [size]="16" />
-                  <span>Create Role</span>
-                }
-              </button>
             }
 
-            <a routerLink="/iam/roles" class="btn btn-secondary">
-              <app-lucide-icon name="x" [size]="16" />
-              Cancel
-            </a>
-          </div>
+            @if (!hasPermissions) {
+              <div class="section-note">
+                Add at least one permission before saving the role.
+              </div>
+            } @else {
+              <div class="permission-list">
+                @for (permission of permissions(); track permission) {
+                  <div class="permission-chip">
+                    <span>{{ permission }}</span>
+                    <button type="button" class="permission-chip__remove" (click)="removePermission(permission)">
+                      <app-lucide-icon name="x" [size]="14" />
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+        </aside>
+      </div>
 
+      <div class="form-actions">
+        <div class="form-actions__buttons">
+          @if (isEditMode()) {
+            <button type="submit" class="btn btn-warning" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Updating...</span>
+              } @else {
+                <app-lucide-icon name="save" [size]="16" />
+                <span>Update Role</span>
+              }
+            </button>
+          } @else {
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Creating...</span>
+              } @else {
+                <app-lucide-icon name="shieldPlus" [size]="16" />
+                <span>Create Role</span>
+              }
+            </button>
+          }
+
+          <a routerLink="/iam/roles" class="btn btn-secondary">
+            <app-lucide-icon name="x" [size]="16" />
+            <span>Cancel</span>
+          </a>
+        </div>
+
+        <div class="form-actions__feedback">
           @if (successMessage) {
-            <div class="feedback-success">
+            <div class="inline-note inline-note--success">
               <app-lucide-icon name="checkCircle" [size]="16" />
-              {{ successMessage }}
+              <span>{{ successMessage }}</span>
             </div>
           }
 
           @if (errorMessage) {
-            <div class="feedback-error">
+            <div class="inline-note inline-note--danger">
               <app-lucide-icon name="alertCircle" [size]="16" />
-              {{ errorMessage }}
+              <span>{{ errorMessage }}</span>
             </div>
           }
         </div>
-      </form>
-    }
-  </div>
+      </div>
+    </form>
+  }
 </div>

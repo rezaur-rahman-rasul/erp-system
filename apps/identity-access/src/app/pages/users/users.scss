@@ -1,5 +1,51 @@
 @use '../../../../../../libs/shared/ui/src/lib/styles/list-styles.scss';
+@reference "../../../styles.scss";
 
 :host {
-  display: block;
+  @apply block;
+}
+
+.records-toolbar {
+  @apply flex flex-col items-start gap-3 lg:items-end;
+}
+
+.records-toolbar__chips {
+  @apply flex flex-wrap gap-2;
+}
+
+.records-toolbar__chip {
+  @apply inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-700;
+}
+
+.records-feedback {
+  @apply rounded-2xl border px-4 py-3 text-sm font-medium;
+}
+
+.records-feedback--success {
+  @apply border-emerald-200 bg-emerald-50 text-emerald-700;
+}
+
+.records-feedback--danger {
+  @apply border-rose-200 bg-rose-50 text-rose-700;
+}
+
+.records-serial {
+  @apply text-center text-xs font-semibold tabular-nums text-slate-500;
+}
+
+.records-primary__title {
+  @apply font-semibold text-slate-900;
+}
+
+.records-tags,
+.records-access {
+  @apply flex flex-wrap gap-1;
+}
+
+.records-code {
+  @apply font-mono text-xs text-slate-600;
+}
+
+.records-muted {
+  @apply text-xs text-slate-500;
 }

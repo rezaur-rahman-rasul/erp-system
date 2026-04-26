@@ -1,302 +1,342 @@
-<div class="user-form-page">
-  <div class="max-w-6xl mx-auto">
+<div class="form-page page-shell">
+  @if (isEditMode()) {
+    <app-form-header
+      icon="pencil"
+      badge="User Management"
+      title="Edit User"
+      subtitle="Update account details, role assignments, and organization access."
+      actionText="Back to Users"
+      actionRoute="/iam/users"
+    ></app-form-header>
+  } @else {
+    <app-form-header
+      icon="userPlus"
+      badge="User Management"
+      title="Create User"
+      subtitle="Create a new account with profile, tenant, role, and access details."
+      actionText="Back to Users"
+      actionRoute="/iam/users"
+    ></app-form-header>
+  }
 
-    <!-- Header changes dynamically based on mode -->
-    @if (isEditMode()) {
-      <app-form-header
-        icon="pencil"
-        badge="Identity Management"
-        title="Edit User"
-        subtitle="Update the user's account details, tenant assignment, or role assignments."
-        actionText="Back to Users"
-        actionRoute="/iam/users"
-      ></app-form-header>
-    } @else {
-      <app-form-header
-        icon="userPlus"
-        badge="Identity Management"
-        title="Create New User"
-        subtitle="Fill in the details below to register a new user account."
-        actionText="Back to Users"
-        actionRoute="/iam/users"
-      ></app-form-header>
-    }
-
-    <!-- Loading state for edit mode -->
-    @if (isLoadingUser()) {
-      <div class="form-section flex items-center justify-center py-14 gap-3 text-slate-400">
-        <app-lucide-icon name="loader" [size]="22" class="animate-spin" />
-        <span class="text-sm font-semibold">Loading user data...</span>
-      </div>
-    }
-
-    @if (!isLoadingUser()) {
-      <form #userForm="ngForm" (ngSubmit)="saveUser(userForm)" novalidate>
-
-        <!-- Two-column layout: main form left, Roles sidebar right -->
-        <div class="form-layout">
-
-          <!-- LEFT COLUMN -->
-          <div class="form-main space-y-6">
-
-            <!-- Section 1: Identity -->
-            <div class="form-section">
-              <div class="form-section-title">
-                <app-lucide-icon name="idCard" [size]="18" />
-                <span>Identity</span>
+  @if (isLoadingUser()) {
+    <div class="loading-state surface-card">
+      <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+      <span>Loading user data...</span>
+    </div>
+  } @else {
+    <form #userForm="ngForm" (ngSubmit)="saveUser(userForm)" novalidate class="form-stack">
+      <div class="form-layout">
+        <div class="form-main">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Profile</p>
+                <h2 class="section-title">Account profile</h2>
               </div>
-              <div class="form-grid">
+            </div>
 
-                <div class="form-field">
-                  <label class="field-label" for="displayName">
-                    Display Name <span class="required-star">*</span>
-                  </label>
+            <div class="form-grid">
+              <label class="field-shell">
+                <span class="field-label">Display name <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="badgeCheck" [size]="16" class="field-shell__icon" />
                   <input
-                    id="displayName" name="displayName" type="text"
-                    class="form-input"
+                    type="text"
+                    class="field-input"
+                    name="displayName"
                     [(ngModel)]="form.displayName"
-                    required maxlength="150"
+                    required
+                    maxlength="150"
                     placeholder="e.g. John Doe"
                     #displayNameCtrl="ngModel"
                   />
-                  @if (displayNameCtrl.invalid && displayNameCtrl.touched) {
-                    <span class="field-error">Display name is required.</span>
-                  }
                 </div>
+                @if (displayNameCtrl.invalid && displayNameCtrl.touched) {
+                  <span class="field-error">Display name is required.</span>
+                }
+              </label>
 
-                <div class="form-field">
-                  <label class="field-label" for="username">
-                    Username <span class="required-star">*</span>
-                  </label>
+              <label class="field-shell">
+                <span class="field-label">Username <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="atSign" [size]="16" class="field-shell__icon" />
                   <input
-                    id="username" name="username" type="text"
-                    class="form-input"
+                    type="text"
+                    class="field-input"
+                    name="username"
                     [(ngModel)]="form.username"
-                    required maxlength="60"
+                    required
+                    maxlength="60"
                     placeholder="e.g. johndoe"
                     #usernameCtrl="ngModel"
                   />
-                  @if (usernameCtrl.invalid && usernameCtrl.touched) {
-                    <span class="field-error">Username is required (max 60 chars).</span>
-                  }
                 </div>
+                @if (usernameCtrl.invalid && usernameCtrl.touched) {
+                  <span class="field-error">Username is required.</span>
+                }
+              </label>
 
-                <div class="form-field col-span-full">
-                  <label class="field-label" for="email">
-                    Email Address <span class="required-star">*</span>
-                  </label>
+              <label class="field-shell form-grid__full">
+                <span class="field-label">Email address <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="mail" [size]="16" class="field-shell__icon" />
                   <input
-                    id="email" name="email" type="email"
-                    class="form-input"
+                    type="email"
+                    class="field-input"
+                    name="email"
                     [(ngModel)]="form.email"
-                    required email maxlength="120"
+                    required
+                    email
+                    maxlength="120"
                     placeholder="john@example.com"
                     #emailCtrl="ngModel"
                   />
-                  @if (emailCtrl.invalid && emailCtrl.touched) {
-                    <span class="field-error">A valid email address is required.</span>
-                  }
                 </div>
+                @if (emailCtrl.invalid && emailCtrl.touched) {
+                  <span class="field-error">A valid email address is required.</span>
+                }
+              </label>
+            </div>
+          </section>
 
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Tenant</p>
+                <h2 class="section-title">Tenant assignment</h2>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label class="field-shell">
+                <span class="field-label">Tenant id <span class="required-star">*</span></span>
+                <div class="field-shell__input">
+                  <app-lucide-icon name="building2" [size]="16" class="field-shell__icon" />
+                  <input
+                    type="text"
+                    class="field-input"
+                    name="tenantId"
+                    [(ngModel)]="form.tenantId"
+                    required
+                    maxlength="80"
+                    placeholder="ERP-DEFAULT"
+                    #tenantCtrl="ngModel"
+                  />
+                </div>
+                @if (tenantCtrl.invalid && tenantCtrl.touched) {
+                  <span class="field-error">Tenant id is required.</span>
+                }
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Security</p>
+                <h2 class="section-title">
+                  @if (isEditMode()) {
+                    Account lifecycle
+                  } @else {
+                    Initial password
+                  }
+                </h2>
               </div>
             </div>
 
             @if (!isEditMode()) {
-              <!-- Section 2: Security -->
-              <div class="form-section">
-                <div class="form-section-title">
-                  <app-lucide-icon name="lock" [size]="18" />
-                  <span>Security</span>
-                </div>
-                <div class="form-grid">
-
-                  <div class="form-field">
-                    <label class="field-label" for="password">
-                      Password <span class="required-star">*</span>
-                    </label>
-                    <div class="input-wrapper">
-                      <input
-                        id="password" name="password"
-                        [type]="showPassword ? 'text' : 'password'"
-                        class="form-input pr-12"
-                        [(ngModel)]="form.password"
-                        required
-                        minlength="8" maxlength="120"
-                        placeholder="Min 8 characters"
-                        #passwordCtrl="ngModel"
-                      />
-                      <button type="button" class="eye-btn" (click)="showPassword = !showPassword" tabindex="-1">
-                        <app-lucide-icon [name]="showPassword ? 'eyeOff' : 'eye'" [size]="16" />
-                      </button>
-                    </div>
-                    @if (passwordCtrl.invalid && passwordCtrl.touched) {
-                      <span class="field-error">Password must be at least 8 characters.</span>
-                    }
-                  </div>
-
-                  <div class="form-field">
-                    <label class="field-label" for="confirmPassword">
-                      Confirm Password <span class="required-star">*</span>
-                    </label>
-                    <div class="input-wrapper">
-                      <input
-                        id="confirmPassword" name="confirmPassword"
-                        [type]="showPassword ? 'text' : 'password'"
-                        class="form-input"
-                        [(ngModel)]="form.confirmPassword"
-                        required
-                        placeholder="Re-enter password"
-                      />
-                    </div>
-                    @if (form.confirmPassword && !passwordsMatch) {
-                      <span class="field-error">Passwords do not match.</span>
-                    }
-                    @if (form.confirmPassword && passwordsMatch && form.password.length >= 8) {
-                      <span class="field-success">Passwords match.</span>
-                    }
-                  </div>
-
-                </div>
-              </div>
-            } @else {
-              <div class="form-section">
-                <div class="form-section-title">
-                  <app-lucide-icon name="shieldAlert" [size]="18" />
-                  <span>Account Lifecycle</span>
-                </div>
-                <p class="text-sm font-semibold text-slate-600">
-                  This form uses the main user update API only.
-                </p>
-                <p class="mt-3 text-sm text-slate-500">
-                  User status changes are handled from the users list through the separate status update endpoint.
-                </p>
-              </div>
-            }
-
-            <!-- Section 3: Organisation -->
-            <div class="form-section">
-              <div class="form-section-title">
-                <app-lucide-icon name="building2" [size]="18" />
-                <span>Organisation</span>
-              </div>
               <div class="form-grid">
-                <div class="form-field">
-                  <label class="field-label" for="tenantId">
-                    Tenant ID <span class="required-star">*</span>
-                  </label>
-                  <input
-                    id="tenantId" name="tenantId" type="text"
-                    class="form-input"
-                    [(ngModel)]="form.tenantId"
-                    required maxlength="80"
-                    placeholder="e.g. ERP-DEFAULT"
-                    #tenantCtrl="ngModel"
-                  />
-                  @if (tenantCtrl.invalid && tenantCtrl.touched) {
-                    <span class="field-error">Tenant ID is required.</span>
-                  }
-                </div>
-              </div>
-            </div>
-
-          </div><!-- /LEFT COLUMN -->
-
-          <!-- RIGHT COLUMN – Roles sidebar -->
-          <aside class="form-sidebar">
-            <div class="form-section h-full">
-              <div class="form-section-title">
-                <app-lucide-icon name="shieldCheck" [size]="18" />
-                <span>Roles <span class="required-star">*</span></span>
-              </div>
-              <p class="text-xs text-slate-400 mb-5">
-                Select one or more roles to assign to this user.
-              </p>
-
-              @if (isLoadingRoles()) {
-                <div class="flex flex-col gap-3">
-                  @for (s of [1,2,3]; track s) {
-                    <div class="skeleton-cell h-10 w-full rounded-2xl"></div>
-                  }
-                </div>
-              }
-
-              @if (!isLoadingRoles()) {
-                @if (availableRoles().length === 0) {
-                  <p class="text-sm text-slate-400 italic">No roles available.</p>
-                } @else {
-                  <div class="role-grid-vertical">
-                    @for (role of availableRoles(); track role.id) {
-                      <button
-                        type="button"
-                        class="role-chip"
-                        [class.role-chip-selected]="isRoleSelected(role.id)"
-                        (click)="toggleRole(role.id)"
-                      >
-                        <app-lucide-icon [name]="isRoleSelected(role.id) ? 'checkCircle' : 'circle'" [size]="15" />
-                        {{ role.name }}
-                      </button>
-                    }
+                <label class="field-shell">
+                  <span class="field-label">Password <span class="required-star">*</span></span>
+                  <div class="field-shell__input">
+                    <app-lucide-icon name="lock" [size]="16" class="field-shell__icon" />
+                    <input
+                      [type]="showPassword ? 'text' : 'password'"
+                      class="field-input"
+                      name="password"
+                      [(ngModel)]="form.password"
+                      required
+                      minlength="8"
+                      maxlength="120"
+                      placeholder="Minimum 8 characters"
+                      #passwordCtrl="ngModel"
+                    />
+                    <button type="button" class="field-action" (click)="showPassword = !showPassword">
+                      <app-lucide-icon [name]="showPassword ? 'eyeOff' : 'eye'" [size]="16" />
+                    </button>
                   </div>
-                }
-              }
+                  @if (passwordCtrl.invalid && passwordCtrl.touched) {
+                    <span class="field-error">Password must be at least 8 characters.</span>
+                  }
+                </label>
 
-              <!-- Roles summary -->
-              @if (selectedRoleIds().size > 0) {
-                <div class="mt-6 rounded-2xl bg-indigo-50 border border-indigo-100 px-4 py-3">
-                  <p class="text-[11px] font-black uppercase tracking-widest text-indigo-400 mb-2">Selected</p>
-                  <p class="text-sm font-bold text-indigo-700">{{ selectedRoleIds().size }} role(s) assigned</p>
-                </div>
-              }
-            </div>
-          </aside>
-
-        </div><!-- /form-layout -->
-
-        <!-- Form Actions -->
-        <div class="flex flex-wrap items-center justify-between gap-4 pt-4">
-          <div class="flex items-center gap-3">
-            @if (isEditMode()) {
-              <button type="submit" class="btn btn-warning" [disabled]="isSubmitting">
-                @if (isSubmitting) {
-                  <app-lucide-icon name="loader" [size]="16" class="animate-spin" />
-                  <span>Updating...</span>
-                } @else {
-                  <app-lucide-icon name="save" [size]="16" />
-                  <span>Update User</span>
-                }
-              </button>
+                <label class="field-shell">
+                  <span class="field-label">Confirm password <span class="required-star">*</span></span>
+                  <div class="field-shell__input">
+                    <app-lucide-icon name="lockKeyhole" [size]="16" class="field-shell__icon" />
+                    <input
+                      [type]="showPassword ? 'text' : 'password'"
+                      class="field-input"
+                      name="confirmPassword"
+                      [(ngModel)]="form.confirmPassword"
+                      required
+                      placeholder="Re-enter password"
+                    />
+                  </div>
+                  @if (form.confirmPassword && !passwordsMatch) {
+                    <span class="field-error">Passwords do not match.</span>
+                  }
+                  @if (form.confirmPassword && passwordsMatch && form.password.length >= 8) {
+                    <span class="field-success">Passwords match.</span>
+                  }
+                </label>
+              </div>
             } @else {
-              <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
-                @if (isSubmitting) {
-                  <app-lucide-icon name="loader" [size]="16" class="animate-spin" />
-                  <span>Creating...</span>
-                } @else {
-                  <app-lucide-icon name="userPlus" [size]="16" />
-                  <span>Create User</span>
-                }
-              </button>
+              <div class="section-note">
+                Account status can be changed later from the users list.
+              </div>
             }
-            <a routerLink="/iam/users" class="btn btn-secondary">
-              <app-lucide-icon name="x" [size]="16" />
-              Cancel
-            </a>
-          </div>
+          </section>
+        </div>
 
+        <aside class="form-sidebar">
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Roles</p>
+                <h2 class="section-title">Assigned roles</h2>
+              </div>
+            </div>
+
+            <p class="section-copy">
+              Select one or more roles to attach to this account.
+            </p>
+
+            @if (isLoadingRoles()) {
+              <div class="loading-stack">
+                @for (s of [1, 2, 3]; track s) {
+                  <div class="skeleton-cell h-10 w-full rounded-2xl"></div>
+                }
+              </div>
+            } @else if (availableRoles().length === 0) {
+              <div class="section-note">No roles are available yet.</div>
+            } @else {
+              <div class="role-list">
+                @for (role of availableRoles(); track role.id) {
+                  <button
+                    type="button"
+                    class="role-chip"
+                    [class.role-chip--selected]="isRoleSelected(role.id)"
+                    (click)="toggleRole(role.id)"
+                  >
+                    <span class="role-chip__indicator">
+                      <app-lucide-icon
+                        [name]="isRoleSelected(role.id) ? 'checkCircle' : 'circle'"
+                        [size]="15"
+                      />
+                    </span>
+                    <span>{{ role.name }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </section>
+
+          <section class="form-section-card surface-card">
+            <div class="form-section-head">
+              <div>
+                <p class="section-kicker">Organization Access</p>
+                <h2 class="section-title">Access overview</h2>
+              </div>
+            </div>
+
+            @if (!isEditMode()) {
+              <div class="section-note">
+                Organization access can be added after the account is created.
+              </div>
+            } @else if (isLoadingAccess()) {
+              <div class="loading-state loading-state--inline">
+                <app-lucide-icon name="loaderCircle" [size]="18" class="animate-spin" />
+                <span>Loading organization access...</span>
+              </div>
+            } @else if (organizationAccesses().length === 0) {
+              <div class="section-note">
+                No organization access assignments were returned for this user.
+              </div>
+            } @else {
+              <div class="access-list">
+                @for (access of organizationAccesses(); track access.id) {
+                  <article class="access-card">
+                    <div class="access-card__top">
+                      <span class="status-chip status-chip--accent">
+                        {{ organizationAccessLabel(access) }}
+                      </span>
+                    </div>
+
+                    <div class="access-card__row">
+                      <span>Legal entity</span>
+                      <strong>{{ access.legalEntityId }}</strong>
+                    </div>
+
+                    <div class="access-card__row">
+                      <span>Branch</span>
+                      <strong>{{ access.branchId || 'All branches' }}</strong>
+                    </div>
+                  </article>
+                }
+              </div>
+            }
+          </section>
+        </aside>
+      </div>
+
+      <div class="form-actions">
+        <div class="form-actions__buttons">
+          @if (isEditMode()) {
+            <button type="submit" class="btn btn-warning" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Updating...</span>
+              } @else {
+                <app-lucide-icon name="save" [size]="16" />
+                <span>Update User</span>
+              }
+            </button>
+          } @else {
+            <button type="submit" class="btn btn-primary" [disabled]="isSubmitting">
+              @if (isSubmitting) {
+                <app-lucide-icon name="loaderCircle" [size]="16" class="animate-spin" />
+                <span>Creating...</span>
+              } @else {
+                <app-lucide-icon name="userPlus" [size]="16" />
+                <span>Create User</span>
+              }
+            </button>
+          }
+
+          <a routerLink="/iam/users" class="btn btn-secondary">
+            <app-lucide-icon name="x" [size]="16" />
+            <span>Cancel</span>
+          </a>
+        </div>
+
+        <div class="form-actions__feedback">
           @if (successMessage) {
-            <div class="feedback-success">
+            <div class="inline-note inline-note--success">
               <app-lucide-icon name="checkCircle" [size]="16" />
-              {{ successMessage }}
+              <span>{{ successMessage }}</span>
             </div>
           }
+
           @if (errorMessage) {
-            <div class="feedback-error">
+            <div class="inline-note inline-note--danger">
               <app-lucide-icon name="alertCircle" [size]="16" />
-              {{ errorMessage }}
+              <span>{{ errorMessage }}</span>
             </div>
           }
         </div>
-
-      </form>
-    }
-  </div>
+      </div>
+    </form>
+  }
 </div>

@@ -1,22 +1,28 @@
-<section class="list-header-card">
+<section class="list-header-card surface-card">
+  <div class="list-header-glow" aria-hidden="true"></div>
+
   <div class="list-header-content">
     <div class="list-header-icon">
       <app-lucide-icon [name]="icon" [size]="26" />
     </div>
 
-    <div>
+    <div class="list-header-copy">
       @if (badge) {
-      <div class="list-header-badge">{{ badge }}</div>
+        <div class="list-header-badge">{{ badge }}</div>
       }
+
       <h1 class="list-header-title">{{ title }}</h1>
       <p class="list-header-subtitle">{{ subtitle }}</p>
     </div>
   </div>
 
   @if (actionText && actionRoute) {
-  <a [routerLink]="actionRoute" class="btn btn-primary relative z-10">
-    <app-lucide-icon name="plus" [size]="16" />
-    <span>{{ actionText }}</span>
-  </a>
+    <div class="list-header-actions">
+      <p class="list-header-note">Quick action</p>
+      <a [routerLink]="actionRoute" class="btn btn-primary relative z-10">
+        <app-lucide-icon name="plus" [size]="16" />
+        <span>{{ actionText }}</span>
+      </a>
+    </div>
   }
 </section>

@@ -1,0 +1,253 @@
+<div class="organization-page page-shell">
+  <app-list-header
+    icon="briefcaseBusiness"
+    badge="Organization Setup"
+    title="Business Units"
+    subtitle="Define the internal operating units that sit under each legal entity."
+    actionText="Create Business Unit"
+    actionRoute="/org/business-units/create"
+  ></app-list-header>
+
+  <app-list-overview
+    icon="layoutDashboard"
+    title="Business unit overview"
+    subtitle="Review business ownership, assigned managers, and current record status."
+    metricLabel="Visible Units"
+    [metricValue]="totalUnitsCount()"
+    guidanceTitle="Quick notes"
+    [guidanceItems]="guidanceItems"
+  ></app-list-overview>
+
+  <section class="table-shell">
+    <div class="table-shell-header">
+      <div>
+        <h2 class="table-shell-title">Business unit list</h2>
+        <p class="table-shell-subtitle">
+          Keep units clearly named so branches and departments can be mapped
+          back to the right operating area.
+        </p>
+      </div>
+
+      <div class="records-toolbar">
+        <div class="records-toolbar__chips">
+          <span class="records-toolbar__chip">{{ activeUnitsCount() }} active</span>
+          <span class="records-toolbar__chip">{{ managedUnitsCount() }} managed</span>
+          <span class="records-toolbar__chip">{{ coveredEntityCount() }} entities covered</span>
+        </div>
+
+        @if (loadError()) {
+          <div class="records-feedback records-feedback--danger">
+            {{ loadError() }}
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="orders-table">
+        <thead>
+          <tr>
+            <th class="text-center" style="width: 56px">Sl.</th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('code')">
+                <span>Code</span>
+                <span class="sort-icon">{{ sortIcon('code') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('name')">
+                <span>Business Unit</span>
+                <span class="sort-icon">{{ singleArrowSortIcon('name') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('legalEntity')">
+                <span>Legal Entity</span>
+                <span class="sort-icon">{{ sortIcon('legalEntity') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('managerEmployeeId')">
+                <span>Manager</span>
+                <span class="sort-icon">{{ sortIcon('managerEmployeeId') }}</span>
+              </button>
+            </th>
+            <th class="text-center">
+              <button
+                type="button"
+                class="th-btn th-btn-center"
+                (click)="toggleSort('status')"
+              >
+                <span>Status</span>
+                <span class="sort-icon">{{ sortIcon('status') }}</span>
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-btn" (click)="toggleSort('lastUpdatedAt')">
+                <span>Updated</span>
+                <span class="sort-icon">{{ sortIcon('lastUpdatedAt') }}</span>
+              </button>
+            </th>
+            <th class="text-center">Actions</th>
+          </tr>
+
+          <tr class="filter-row">
+            <th></th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter code"
+                [value]="filters().code"
+                (input)="setFilter('code', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter unit"
+                [value]="filters().name"
+                (input)="setFilter('name', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter entity"
+                [value]="filters().legalEntity"
+                (input)="setFilter('legalEntity', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Filter manager"
+                [value]="filters().manager"
+                (input)="setFilter('manager', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="text"
+                placeholder="Status"
+                [value]="filters().status"
+                (input)="setFilter('status', $any($event.target).value)"
+              />
+            </th>
+            <th>
+              <input
+                class="filter-input"
+                type="date"
+                [value]="filters().updatedAt"
+                (input)="setFilter('updatedAt', $any($event.target).value)"
+              />
+            </th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody [class.data-rows-container]="!isLoading()">
+          @if (isLoading()) {
+            @for (row of skeletonRows; track $index) {
+              <tr class="skeleton-row">
+                <td><div class="skeleton-cell w-8 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 56%"></div></td>
+                <td><div class="skeleton-cell" style="width: 72%"></div></td>
+                <td><div class="skeleton-cell" style="width: 80%"></div></td>
+                <td><div class="skeleton-cell" style="width: 58%"></div></td>
+                <td><div class="skeleton-cell w-24 mx-auto"></div></td>
+                <td><div class="skeleton-cell" style="width: 68%"></div></td>
+                <td><div class="skeleton-cell w-16 mx-auto"></div></td>
+              </tr>
+            }
+          }
+
+          @if (!isLoading() && pagedUnits().length === 0) {
+            <tr>
+              <td colspan="8" class="empty-row-cell">
+                <div class="empty-state-inline">
+                  <div class="empty-icon">
+                    <app-lucide-icon name="briefcaseBusiness" [size]="28" />
+                  </div>
+                  <h3 class="empty-title">No business units matched the current filters</h3>
+                  <p class="empty-subtitle">
+                    Adjust the filters or create a new business unit.
+                  </p>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (!isLoading()) {
+            @for (unit of pagedUnits(); track trackUnit($index, unit); let i = $index) {
+              <tr class="data-row">
+                <td class="records-serial">{{ serialOf(i) }}</td>
+
+                <td>
+                  <a
+                    class="order-link"
+                    [routerLink]="['/org/business-units', unit.id, 'edit']"
+                    title="Edit business unit"
+                  >
+                    <span>{{ unit.code }}</span>
+                    <app-lucide-icon name="sparkles" [size]="14" />
+                  </a>
+                </td>
+
+                <td>
+                  <div class="records-primary">
+                    <span class="records-primary__title">{{ unit.name }}</span>
+                    <span class="records-primary__meta">
+                      {{ unit.description || 'No description provided' }}
+                    </span>
+                  </div>
+                </td>
+
+                <td class="records-muted">{{ legalEntityName(unit.legalEntityId) }}</td>
+                <td class="records-muted">{{ unit.managerEmployeeId || 'Not assigned' }}</td>
+
+                <td class="text-center">
+                  <span class="status-badge" [class]="statusClass(unit.status)">
+                    {{ unit.status }}
+                  </span>
+                </td>
+
+                <td class="records-muted">
+                  {{ formatDate(unit.lastUpdatedAt || unit.createdAt) }}
+                </td>
+
+                <td>
+                  <div class="action-group">
+                    <a
+                      [routerLink]="['/org/business-units', unit.id, 'edit']"
+                      class="action-btn action-amber"
+                    >
+                      Edit
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (!isLoading()) {
+      <app-list-pagination
+        [currentPage]="currentPage()"
+        [totalPages]="totalPages()"
+        [rowsPerPage]="rowsPerPage()"
+        [pageInfo]="pageInfo()"
+        (rowsPerPageChange)="setRowsPerPage($event)"
+        (prevPage)="prevPage()"
+        (nextPage)="nextPage()"
+        (goToPage)="goToPage($event)"
+      ></app-list-pagination>
+    }
+  </section>
+</div>
